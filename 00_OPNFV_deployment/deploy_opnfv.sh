@@ -1,6 +1,8 @@
 #!/bin/bash
 # on HW server
 # to deploy opnfv via Apex
+
+# HW: 4 core/E7-8890-v3 512G RAM
 opnfv-clean
 cd /etc/opnfv-apex 
 screen -S apex_deploy_screen \
