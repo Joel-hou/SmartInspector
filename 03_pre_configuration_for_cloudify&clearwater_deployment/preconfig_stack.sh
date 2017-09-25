@@ -1,8 +1,6 @@
 #!/bin/bash
 
 # pre-configuration for cloudify&clearwater deployment
-# to do some pre-config for overcloud
-
 cd ~
 source ./overcloudrc
 
