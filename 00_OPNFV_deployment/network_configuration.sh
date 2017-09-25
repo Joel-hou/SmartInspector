@@ -4,6 +4,8 @@
 ansible-playbook network_configuration_controller.yml
 ansible-playbook network_configuration_compute.yml
 
+# wait network of compute and controller nodes recoveyed
+sleep 10
 # modify default external network
 source ~/overcloudrc
 # delete external default subnet
