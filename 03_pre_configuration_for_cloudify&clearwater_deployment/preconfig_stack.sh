@@ -1,9 +1,11 @@
 #!/bin/bash
 
+# exit when error occurs
+set -e
+
 # pre-configuration for cloudify&clearwater deployment
 cd ~
 source ./overcloudrc
-
 # variables (default values given here)
 your_network_name=test_zhian
 your_subnet_name=test_hou_sub
