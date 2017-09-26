@@ -1,51 +1,50 @@
 # Doctor Configuration Guide
 
-## Doctor setup 
+## Doctor feature setup in opnfv
 
-- Add congress datasource driver
-
+- Patch apply
 ```shell
-co_conf=/etc/congress/congress.conf
-co_entry="congress.datasources.doctor_driver.DoctorDriver"
-
-if sudo grep -e "^drivers.*$co_entry" $co_conf; then
-    echo "NOTE: congress is configured as we needed"
-else
-    echo "modify the congress config"
-    sudo sed -i -e "/^drivers/s/$/,$co_entry" $co_conf
-    sudo systemctl restart openstack-congress-server.service
-fi
-
+ansible controller -m script -a "your_path/doctor_configuration.sh" --sudo 
 ```
-- Create datasource for doctor 
 
+- Create datasource for doctor 
+on stack VM 
 ```shell
+# overcloud
+source overcloudrc
 # openstack congress datasource create <datasource driver> <datasource name>
 openstack congress datasource create doctor doctor
 ```
+
 - Add congress policy rule
+on stack VM
+```shell
+# overcloud
+source overcloudrc
 
-```shell
-```
-- Add notifier topic to Ceilometer
-```shell
-# add notifier topic 
-ep_conf=/etc/ceilometer/event_pipeline.yaml
-ep_entry="- notifier://?topic=alarm.all"
+openstack congress policy rule create \
+    --name host_down classification \
+    'host_down(host) :-
+        doctor:events(hostname=host, type="compute.host.down", status="down")'
 
-if sudo grep -e "$ep_entry" $ep_conf; then
-    echo "NOTE: ceilometer is configured as we needed"
-else
-    echo "modify the ceilometer config"
-    sudo sed -i -e "$ a \ \ \ \ \ \ \ \ \ \ $ep_entry" $ep_conf
-    sudo systemctl restart openstack-ceilometer-notification.service
-fi
+openstack congress policy rule create \
+    --name active_instance_in_host classification \
+    'active_instance_in_host(vmid, host) :-
+        nova:servers(id=vmid, host_name=host, status="ACTIVE")'
+
+openstack congress policy rule create \
+    --name host_force_down classification \
+    'execute[nova:services.force_down(host, "nova-compute", "True")] :-
+        host_down(host)'
+
+openstack congress policy rule create \
+    --name error_vm_states classification \
+    'execute[nova:servers.reset_state(vmid, "error")] :-
+        host_down(host),
+        active_instance_in_host(vmid, host)'
 ```
-Using ansible
-```shell
-ansible controller -m script 
-```
+
 - Create alarm
 ```shell
-
+aodh alarm create --name test_alarm --type event --alarm-action "http://127.0.0.1:12346/" --repeat-actions false --event-type compute.instance.update --query "traits.state=string::error"
 ```
