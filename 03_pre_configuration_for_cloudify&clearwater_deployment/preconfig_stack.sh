@@ -68,7 +68,7 @@ nova secgroup-add-rule $sec_grp_id tcp 1 65535 0.0.0.0/0
 ssh-keygen -R $your_VM_ip
 echo  '#!/bin/bash' > $your_ssh_key_name.sh
 echo -e "\n" >> $your_ssh_key_name.sh
-echo "ssh -i ./$your_ssh_key_name.pem ubuntu@$your_VM_ip" >> $your_ssh_key_name.sh
+echo "ssh -o StrictHostKeyChecking=no -i ./$your_ssh_key_name.pem ubuntu@$your_VM_ip" >> $your_ssh_key_name.sh
 chmod +x ./$your_ssh_key_name.sh
 
 # change  default openstack quota
