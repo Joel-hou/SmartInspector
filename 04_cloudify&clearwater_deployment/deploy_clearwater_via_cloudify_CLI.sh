@@ -3,8 +3,13 @@
 # on test_zhian
 # deploy clearwater via cloudify CLI 3.3.1
 
+# exit when error occurred
+set -e
+
 if [ -e ~/overcloudrc ]; then
     source ~/overcloudrc
+else echo "please upload overcloudrc to cloudify CLI VM!\n"
+    exit 1
 fi
 
 source ~/cloudify/bin/activate
