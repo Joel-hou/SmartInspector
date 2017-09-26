@@ -9,6 +9,7 @@ curl -sSL https://get.docker.com/ | sh
 # fix by adding the current user to the docker group: sudo usermod -a -G docker $USER
 # log out of your account and then back log in
 # our opnfv version is danube 3.0
+sudo usermod -a -G docker $USER
 docker pull opnfv/functest:danube.3.0
 # run the docker container
 docker run --dns=192.168.32.201 -it opnfv/functest:danube.3.0 /bin/bash
