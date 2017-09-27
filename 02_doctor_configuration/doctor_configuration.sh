@@ -6,6 +6,9 @@ source ~/overcloudrc
 # configuration for all controller nodes
 ansible controller -m script -a "./doctor_configuration_controller.sh" --sudo
 
+# create doctor datasource
+openstack congress datasource create doctor doctor
+
 # create congress policy
 openstack congress policy rule create \
     --name host_down classification \
