@@ -1,19 +1,20 @@
 #!/bin/bash
 
 # on stack VM overcloud, please make sure your environment variable is clean
-# source /home/stack/overcloudrc
-# before any other operation
+# source ~/overcloudrc
+# !before any other operation
 
 # configuration for all controller nodes
 ansible controller -m script -a "./notification_configuration_controller.sh"
 
-source /home/stack/overcloudrc
 # create doctor datasource
 openstack congress datasource create doctor doctor
 
 # create congress policy
-openstack congress policy rule create --name host_down classification 'host_down(host) :-
-doctor:events(hostname=host, type="compute.host.down", status="down")'
+openstack congress policy rule create \
+    --name host_down classification \
+    'host_down(host) :-
+        doctor:events(hostname=host, type="compute.host.down", status="down")'
 
 openstack congress policy rule create \
     --name active_instance_in_host classification \
