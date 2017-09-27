@@ -28,4 +28,4 @@ openstack congress policy rule create \
         active_instance_in_host(vmid, host)'
 
 # create alarm
-aodh alarm create --name test_alarm --type event --alarm-action "http://127.0.0.1:12346/" --repeat-actions false --event-type compute.instance.update --query "traits.state=string::pause"
+aodh alarm create --name test_alarm --type event --alarm-action "http://127.0.0.1:12346/" --repeat-actions false --event-type compute.instance.update --query "traits.state=string::paused"
