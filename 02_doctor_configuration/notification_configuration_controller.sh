@@ -34,6 +34,8 @@ if sudo grep -e "^$ce_entry$" $ce_conf; then
 else
     echo "modify ceilometer.conf "
     sudo sed -i -e "s|^#event_topic = event$|event_topic = event|" $ce_conf
+    sudo service openstack-ceilometer-notification restart
+    sudo service openstack-ceilometer-central restart
 fi
 
 # nova configuration for notification
