@@ -1,53 +1,28 @@
 #!/bin/bash
 
-# add congress datasource driver
-co_conf=/etc/congress/congress.conf
-co_entry="congress.datasources.doctor_driver.DoctorDriver"
+# on stack VM, please make sure your environment variable is clean
+source ~/overcloudrc
 
-if sudo grep -e "^drivers.*$co_entry" $co_conf; then
-    echo "NOTE: congress is configured as we needed"
-else
-    echo "modify the congress config"
-    sudo sed -i -e "/^drivers/s/$/,$co_entry/" \
-        $co_conf
-    sudo systemctl restart openstack-congress-server.service
-fi
+# configuration for all controller nodes
+ansible controller -m script -a "./doctor_configuration_controller.sh" --sudo
 
-# add user defined publisher of topic event
-## ep means event_pipeline
-ep_conf=/etc/ceilometer/event_pipeline.yaml
-ep_entry="- notifier://?topic=alarm.all"
+# create congress policy
+openstack congress policy rule create \
+    --name host_down classification \
+    'host_down(host) :-
+        doctor:events(hostname=host, type="compute.host.down", status="down")'
 
-if sudo grep -e "$ep_entry" $ep_conf; then
-    echo "NOTE: ceilometer event_pipeline is configured as we needed"
-else
-    echo "modify the ceilometer event_pipeline.yaml"
-    sudo sed -i -e "$ a \ \ \ \ \ \ \ \ \ \ $ep_entry" $ep_conf
-    sudo systemctl restart openstack-ceilometer-notification.service
-fi
+openstack congress policy rule create \
+    --name active_instance_in_host classification \
+    'active_instance_in_host(vmid, host) :-
+        nova:servers(id=vmid, host_name=host, status="ACTIVE")'
 
-# add ceilometer notifier topic 
-ce_conf=/etc/ceilometer/ceilometer.conf
-ce_entry="event_topic = event"
-if sudo grep -e "^$ce_entry$" $ce_conf; then
-    echo "NOTE: ceilometer.conf is configured as we needed"
-else
-    echo "modify ceilometer.conf "
-    sudo sed -i -e "s|^#event_topic = event$|event_topic = event|" $ce_conf
-fi
+# pause VM
+openstack congress policy rule create \
+    --name pause_vm_states classification \
+    'execute[nova:servers.pause(vmid)] :-
+        host_down(host),
+        active_instance_in_host(vmid, host)'
 
-# nova configuration for notification
-no_conf=/etc/nova/nova.conf
-no_entry="topics=notifications"
-if sudo grep -e "$no_entry" $no_conf; then
-    echo "NOTE: nova.conf is configured as we needed"
-else
-    echo "modify nova.conf"
-    sudo sed -i '/driver=messagingv2/atopics=notifications' $no_conf
-    sudo service openstack-nova-api restart 
-    sudo service openstack-nova-cert restart 
-    sudo service openstack-nova-consoleauth restart
-    sudo service openstack-nova-scheduler restart
-    sudo service openstack-nova-conductor restart
-    sudo service openstack-nova-novncproxy restart
-fi
+# create alarm
+aodh alarm create --name test_alarm --type event --alarm-action "http://127.0.0.1:12346/" --repeat-actions false --event-type compute.instance.update --query "traits.state=string::pause"
