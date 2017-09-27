@@ -8,7 +8,7 @@ ansible controller -m script -a "your_path/doctor_configuration.sh" --sudo
 ```
 
 - Create datasource for doctor 
-on stack VM 
+On stack VM 
 ```shell
 # overcloud
 source overcloudrc
@@ -17,7 +17,8 @@ openstack congress datasource create doctor doctor
 ```
 
 - Add congress policy rule
-on stack VM
+On stack VM, these policy enable Congress to force down nova compute service when it received a fault event of that compute host. Also, Congress will set the state of all VMs running on that host from ACTIVE to ERROR state
+
 ```shell
 # overcloud
 source overcloudrc
