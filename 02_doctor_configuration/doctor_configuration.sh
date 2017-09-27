@@ -7,8 +7,8 @@ co_entry="congress.datasources.doctor_driver.DoctorDriver"
 if sudo grep -e "^drivers.*$co_entry" $co_conf; then
     echo "NOTE: congress is configured as we needed"
 else
-    echo "modify congress.conf"
-    sudo sed -i -e "/^drivers/s/$/,$co_entry" \
+    echo "modify the congress config"
+    sudo sed -i -e "/^drivers/s/$/,$co_entry/" \
         $co_conf
     sudo systemctl restart openstack-congress-server.service
 fi
