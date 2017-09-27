@@ -13,17 +13,7 @@ else
     sudo systemctl restart openstack-congress-server.service
 fi
 
-# add ceilometer notifier topic 
-ce_conf=/etc/ceilometer/ceilometer.conf
-ce_entry="event_topic = event"
-if sudo grep -e "^$ce_entry$" $ce_conf; then
-    echo "NOTE: ceilometer.conf is configured as we needed"
-else
-    echo "modify ceilometer.conf "
-    sudo sed -i -e "s|^#event_topic = event$|event_topic = event|" $ce_conf
-fi
-
-# add user defined publisher of topic previous defined 
+# add user defined publisher of topic event
 ## ep means event_pipeline
 ep_conf=/etc/ceilometer/event_pipeline.yaml
 ep_entry="- notifier://?topic=alarm.all"
@@ -34,6 +24,16 @@ else
     echo "modify the ceilometer event_pipeline.yaml"
     sudo sed -i -e "$ a \ \ \ \ \ \ \ \ \ \ $ep_entry" $ep_conf
     sudo systemctl restart openstack-ceilometer-notification.service
+fi
+
+# add ceilometer notifier topic 
+ce_conf=/etc/ceilometer/ceilometer.conf
+ce_entry="event_topic = event"
+if sudo grep -e "^$ce_entry$" $ce_conf; then
+    echo "NOTE: ceilometer.conf is configured as we needed"
+else
+    echo "modify ceilometer.conf "
+    sudo sed -i -e "s|^#event_topic = event$|event_topic = event|" $ce_conf
 fi
 
 # nova configuration for notification
