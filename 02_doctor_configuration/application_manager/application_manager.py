@@ -9,7 +9,8 @@ import time
 
 app = Flask(__name__)
 
-@app.route('/failure', methods=['POST'])
+# app route should be the same with your alarm event url
+@app.route('/', methods=['POST'])
 def event_posted():
     LOG.info('application manager notified at %s' % time.time())
     LOG.info('received data = %s' % request.data)

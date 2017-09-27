@@ -51,3 +51,17 @@ else
     sudo service openstack-nova-conductor restart
     sudo service openstack-nova-novncproxy restart
 fi
+
+# aoch configuration 
+ao_conf=/etc/aodh/aodh.conf
+ao_entry="event_alarm_topic = alarm.all"
+
+if sudo grep -e "^$ao_entry" $ao_conf; then
+    echo "NOTE: aodh.conf is configured as we needed"
+else
+    echo "modify aodh.conf"
+    sudo sed -i -e "s|^#event_alarm_topic = alarm.all$|event_alarm_topic = alarm.all|" $ao_conf
+    sudo service openstack-aodh-listener restart
+    sudo service openstack-aodh-notifier restart
+fi
+
