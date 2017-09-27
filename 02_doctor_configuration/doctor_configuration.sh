@@ -3,10 +3,10 @@
 # on stack VM, please make sure your environment variable is clean
 
 # configuration for all controller nodes
-ansible controller -m script -a "./notification_configuration_controller.sh" --sudo
+ansible controller -m script -a "./notification_configuration_controller.sh"
 
 # overcloud
-source ~/overcloudrc
+source /home/stack/overcloudrc
 # create doctor datasource
 openstack congress datasource create doctor doctor
 
