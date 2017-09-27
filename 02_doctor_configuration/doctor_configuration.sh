@@ -1,18 +1,24 @@
 #!/bin/bash
 
 # add ceilometer notifier topic 
-
-
+ce_conf=/etc/ceilometer/ceilometer.conf
+ce_entry="event_topic = event"
+if sudo grep -e "^$ce_entry$" $ce_conf; then
+    echo "NOTE: ceilometer.conf is configured as we needed"
+else
+    echo "modify the ceilometer.conf "
+    sudo sed -e "s|^#event_topic = event$|event_topic = event|" $ce_conf > world
+fi
 
 # add user defined publisher of topic previous defined 
-# ep means event_pipeline
+## ep means event_pipeline
 ep_conf=/etc/ceilometer/event_pipeline.yaml
 ep_entry="- notifier://?topic=alarm.all"
 
 if sudo grep -e "$ep_entry" $ep_conf; then
-    echo "NOTE: ceilometer is configured as we needed"
+    echo "NOTE: ceilometer event_pipeline is configured as we needed"
 else
-    echo "modify the ceilometer config"
+    echo "modify the ceilometer event_pipeline config"
     sudo sed -i -e "$ a \ \ \ \ \ \ \ \ \ \ $ep_entry" $ep_conf
     sudo systemctl restart openstack-ceilometer-notification.service
 fi
