@@ -6,7 +6,7 @@
 #  /etc/nova/nova.conf
 set -e
 
-sudo yum install nfs-utils
+sudo yum install nfs-utils -y
 sudo echo "/var/lib/nova/instances 192.0.2.0/24(rw,sync,no_root_squash,insecure)" > /etc/exports
 # maintain table of exported NFS file systems
 sudo exportfs -rv

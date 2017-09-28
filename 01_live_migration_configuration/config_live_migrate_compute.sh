@@ -7,7 +7,7 @@
 # $1 is nfs-server's ip
 set -e
 
-yum install nfs-utils
+yum install nfs-utils -y
 mount $1:/var/lib/nova/instances /var/lib/nova/instances 
 echo "$1:/var/lib/nova/instances /var/lib/nova/instances nfs defaults 0 0" >> /etc/fstab
 mount -a -v 
