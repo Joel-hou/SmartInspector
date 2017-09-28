@@ -1,51 +1,23 @@
 # Doctor Configuration Guide
 
 ## Doctor feature setup in opnfv
-
-- Patch apply
 ```shell
-ansible controller -m script -a "your_path/doctor_configuration.sh" --sudo 
+sudo chmod +x doctor_configuration.sh
+./doctor_configuration.sh
 ```
-
-- Create datasource for doctor 
-On stack VM 
+## Remove doctor feature patch
 ```shell
-# overcloud
-source overcloudrc
-# openstack congress datasource create <datasource driver> <datasource name>
-openstack congress datasource create doctor doctor
-```
+# please make sure 
+# source ~/overcloudrc before
 
-- Add congress policy rule
-On stack VM, these policy enable Congress to force down nova compute service when it received a fault event of that compute host. Also, Congress will set the state of all VMs running on that host from ACTIVE to ERROR state
+# remove alarm
+aodh alarm delete test_alarm
 
-```shell
-# overcloud
-source overcloudrc
+# delete congress policy
+openstack congress policy rule delete classification pause_vm_states
+openstack congress policy rule delete classification pause_vm_states
+openstack congress policy rule delete classification  host_down
 
-openstack congress policy rule create \
-    --name host_down classification \
-    'host_down(host) :-
-        doctor:events(hostname=host, type="compute.host.down", status="down")'
-
-openstack congress policy rule create \
-    --name active_instance_in_host classification \
-    'active_instance_in_host(vmid, host) :-
-        nova:servers(id=vmid, host_name=host, status="ACTIVE")'
-
-openstack congress policy rule create \
-    --name host_force_down classification \
-    'execute[nova:services.force_down(host, "nova-compute", "True")] :-
-        host_down(host)'
-
-openstack congress policy rule create \
-    --name error_vm_states classification \
-    'execute[nova:servers.reset_state(vmid, "error")] :-
-        host_down(host),
-        active_instance_in_host(vmid, host)'
-```
-
-- Create alarm
-```shell
-aodh alarm create --name test_alarm --type event --alarm-action "http://127.0.0.1:12346/" --repeat-actions false --event-type compute.instance.update --query "traits.state=string::error"
+# delete congress datasource
+openstack congress datasource delete doctor
 ```

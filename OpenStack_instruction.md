@@ -64,24 +64,23 @@ aodh alarm create --name test_alarm --type event --alarm-action "http://127.0.0.
 ```
 ### Delete alarm 
 ```shell
-        aodh alarm delete ALARM_ID
+aodh alarm delete test_alarm 
 ```
 ### Show alarm 
 ```shell
-        aodh alarm list
+aodh alarm list
 ```
-
 ### Show alarm history
 ```shell
-        aodh alarm-history show ALARM_ID
+aodh alarm-history show test_alarm 
 ```
 ### Get alarm state
 ```shell
-        openstack alarm state get ALARM_ID
+alarm state get test_alarm 
 ```
 ### Set alarm state
 ```shell
-        openstack alarm state set --state ok ALARM_ID
+aodh alarm state set --state ok test_alarm   
 ```
 
 ## Ceilometer

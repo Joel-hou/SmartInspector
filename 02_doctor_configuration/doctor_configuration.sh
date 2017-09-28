@@ -11,9 +11,9 @@ ansible controller -m script -a "./notification_configuration_controller.sh"
 openstack congress datasource create doctor doctor
 
 # add policy
-openstack congress policy rule create \
-    --name host_down classification \
-    'host_down(host) :-
+# xuan xue:Syntax error for rule::Literal doctor:events(hostname=host, status="down", type="compute.host.down") uses named arguments, but the schema is unknown.
+# the following line should work
+openstack congress policy rule create     --name host_down classification     'host_down(host) :-
         doctor:events(hostname=host, type="compute.host.down", status="down")'
 
 openstack congress policy rule create \
