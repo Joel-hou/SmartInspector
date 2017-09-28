@@ -27,7 +27,7 @@ function bootstrap_cloudify_manager{
     git clone -b 3.3.1-build  https://github.com/boucherv-orange/cloudify-manager-blueprints.git
 
     # initialize cfy work environment (initializes CLI configuration files)
-    cfy init
+    cfy init -r
     cd cloudify-manager-blueprints/
     cfy local create-requirements -o requirements.txt -p openstack-manager-blueprint.yaml
     sudo pip install -r requirements.txt
