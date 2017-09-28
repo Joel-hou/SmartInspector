@@ -5,6 +5,7 @@
 # run as root user
 
 # $1 is nfs-server's ip
+set -e
 
 yum install nfs-utils
 mount $1:/var/lib/nova/instances /var/lib/nova/instances 

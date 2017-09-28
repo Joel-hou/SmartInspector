@@ -4,6 +4,7 @@
 # this script is used to config live-migration and should be executed as root
 # NFS server should be installed in your one of controller node
 #  /etc/nova/nova.conf
+set -e
 
 sudo yum install nfs-utils
 sudo echo "/var/lib/nova/instances 192.0.2.0/24(rw,sync,no_root_squash,insecure)" > /etc/exports
