@@ -5,7 +5,11 @@ from flask import Flask
 from flask import request
 import json
 import os
+# logger.py in the same directory
+import logger as doctor_log
 import time
+
+LOG = doctor_log.Logger('doctor_consumer').getLogger()
 
 app = Flask(__name__)
 
