@@ -6,42 +6,47 @@
 # exit when error occurred
 set -e
 
-if [ -e ~/overcloudrc ]; then
-    source ~/overcloudrc
-else echo "please upload overcloudrc to cloudify CLI VM!\n"
-    exit 1
-fi
+function deploy_cleatwater{
 
-source ~/cloudify/bin/activate
-cd ~/cloudify/cloudify-manager/
-mkdir blueprints
-cd blueprints
-git clone -b stable https://github.com/Orange-OpenSource/opnfv-cloudify-clearwater.git
-cd opnfv-cloudify-clearwater
+    if [ -e ~/overcloudrc ]; then
+        source ~/overcloudrc
+    else echo "please upload overcloudrc to cloudify CLI VM!\n"
+        exit 1
+    fi
 
-# upload clearwater blueprint
-cfy blueprints upload -b clearwater-3.3 -p openstack-blueprint.yaml
+    source ~/cloudify/bin/activate
+    cd ~/cloudify/cloudify-manager/
+    mkdir blueprints
+    cd blueprints
+    git clone -b stable https://github.com/Orange-OpenSource/opnfv-cloudify-clearwater.git
+    cd opnfv-cloudify-clearwater
 
-# begin to deploy clearwater
-m_cw_image_id=$(openstack image list | grep -i trusty | cut -d'|' -f 2)
-m_cw_image_id=$(echo $m_cw_image_id)
-m_cw_flavor_id=$(nova flavor-list | grep small | cut -d'|' -f 2)
-m_cw_flavor_id=$(echo $m_cw_flavor_id)
-m_cw_agent_user='ubuntu'
-m_cw_external_network_name='external'
-m_cw_public_domain='clearwater.opnfv'
+    # upload clearwater blueprint
+    cfy blueprints upload -b clearwater-3.3 -p openstack-blueprint.yaml
 
-# provide inputs information
-cp inputs/openstack.yaml.template inputs/inputs.yaml
-echo -e "image_id: '$m_cw_image_id'\n" > inputs/inputs.yaml
-echo -e "flavor_id: '$m_cw_flavor_id'\n" >> inputs/inputs.yaml
-echo -e "agent_user: '$m_cw_agent_user'\n" >> inputs/inputs.yaml
-echo -e "external_network_name: '$m_cw_external_network_name'\n" >> inputs/inputs.yaml
-echo -e "public_domain: '$m_cw_public_domain'\n" >> inputs/inputs.yaml
+    # begin to deploy clearwater
+    m_cw_image_id=$(openstack image list | grep -i trusty | cut -d'|' -f 2)
+    m_cw_image_id=$(echo $m_cw_image_id)
+    m_cw_flavor_id=$(nova flavor-list | grep small | cut -d'|' -f 2)
+    m_cw_flavor_id=$(echo $m_cw_flavor_id)
+    m_cw_agent_user='ubuntu'
+    m_cw_external_network_name='external'
+    m_cw_public_domain='clearwater.opnfv'
 
-cfy deployments create -b clearwater-3.3 -d clearwater-test --inputs inputs/inputs.yaml
+    # provide inputs information
+    cp inputs/openstack.yaml.template inputs/inputs.yaml
+    echo -e "image_id: '$m_cw_image_id'\n" > inputs/inputs.yaml
+    echo -e "flavor_id: '$m_cw_flavor_id'\n" >> inputs/inputs.yaml
+    echo -e "agent_user: '$m_cw_agent_user'\n" >> inputs/inputs.yaml
+    echo -e "external_network_name: '$m_cw_external_network_name'\n" >> inputs/inputs.yaml
+    echo -e "public_domain: '$m_cw_public_domain'\n" >> inputs/inputs.yaml
 
-cfy executions start -w install -d clearwater-test
+    cfy deployments create -b clearwater-3.3 -d clearwater-test --inputs inputs/inputs.yaml
 
-# get outputs for deployment
-cfy deployments outputs -d clearwater-test
+    cfy executions start -w install -d clearwater-test
+
+    # get outputs for deployment
+    cfy deployments outputs -d clearwater-test
+}
+
+deploy_cleatwater
