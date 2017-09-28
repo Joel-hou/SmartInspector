@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # modify app route if necessary
+
 import argparse
 from flask import Flask
 from flask import request
@@ -23,7 +24,7 @@ def event_posted():
 
 
 def get_args():
-    parser = argparse.ArgumentParser(description='Doctor Sample Application manager')
+    parser = argparse.ArgumentParser(description='2f11 Sample Application manager')
     parser.add_argument('port', metavar='PORT', type=int, nargs='?',
                         help='the port for application manager')
     return parser.parse_args()
