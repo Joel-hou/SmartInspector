@@ -4,8 +4,12 @@
 This is our OPNFV doctor project experimental configuration tutorials
 
 ![](doctor.png)
-We use zabbix as our Monitor, openstack congress as Inspector.
 
+The original goal of our project is the conversation is not interrupted when hardware error occurs such as NIC down, after a few tries, We provide two solution here:
+- Solution 1:
+- Solution 2:
+
+We use zabbix as our Monitor, openstack congress as our Inspector. 
 
 ## 0 OPNFV Deployment
 
