@@ -6,16 +6,15 @@
 # exit when error occurred
 set -e
 
-function bootstrap_cloudify_manager{
+function bootstrap_cloudify_manager(){
 
-    cd ~
     # install virtualenv
     sudo apt-get update
     sudo apt-get install git python-pip python-dev python-virtualenv -y \
     && sudo apt-get install nova-console -y \
     && sudo apt-get install python-novaclient -y \
     && sudo apt-get install python-openstackclient -y
-
+    cd ~
     virtualenv cloudify
     source cloudify/bin/activate
 

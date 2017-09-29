@@ -6,7 +6,7 @@
 # exit when error occurred
 set -e
 
-function deploy_clearwater{
+function deploy_clearwater(){
 
     if [ -e ~/overcloudrc ]; then
         source ~/overcloudrc
