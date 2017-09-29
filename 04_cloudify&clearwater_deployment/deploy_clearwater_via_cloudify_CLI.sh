@@ -6,7 +6,7 @@
 # exit when error occurred
 set -e
 
-function deploy_cleatwater{
+function deploy_clearwater{
 
     if [ -e ~/overcloudrc ]; then
         source ~/overcloudrc
@@ -49,4 +49,4 @@ function deploy_cleatwater{
     cfy deployments outputs -d clearwater-test
 }
 
-deploy_cleatwater
+# deploy_clearwater

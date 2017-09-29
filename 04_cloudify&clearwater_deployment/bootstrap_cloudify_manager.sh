@@ -115,4 +115,4 @@ function bootstrap_cloudify_manager{
     -i openstack-manager-blueprint-inputs.yaml
 }
 
-bootstrap_cloudify_manager
+# bootstrap_cloudify_manager
