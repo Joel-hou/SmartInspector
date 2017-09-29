@@ -6,8 +6,7 @@ NFS configuration should be done before any of your VM booted, otherwise VM boot
 NFS server should be installed in ONE of your controller nodes
 
 ```shell
-ssh heat-admin@your_controller_0_ipaddress
-./config_live_migrate_controller.sh
+ansible controller-0 -m script -a "config_live_migrate_controller.sh" --sudo
 ```
 - Compute node
 
