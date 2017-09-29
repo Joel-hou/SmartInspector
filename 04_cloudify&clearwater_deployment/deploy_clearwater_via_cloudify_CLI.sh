@@ -49,4 +49,4 @@ function deploy_clearwater{
     cfy deployments outputs -d clearwater-test
 }
 
-# deploy_clearwater
+deploy_clearwater
