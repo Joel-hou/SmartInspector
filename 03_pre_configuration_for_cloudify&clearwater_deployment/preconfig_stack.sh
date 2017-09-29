@@ -78,6 +78,13 @@ chmod +x ./$your_ssh_key_name.sh
 openstack quota set admin --instances 30
 ## increase limit of the number of CPU
 openstack quota set admin --cores 30
+# change security group quota via ansible
+ansible controller -m script -a "./change_security_group_quota.sh" --sudo
+
 # wait virtual machine to start normally, time spent to boot a VM may depend your environment, 20s may be too short if you can't afford a good machine
 sleep 20
 scp -i ./$your_ssh_key_name.pem overcloudrc ubuntu@$your_VM_ip:~/
+
+
+
+
