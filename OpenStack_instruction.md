@@ -114,4 +114,14 @@ openstack congress policy rule create \
 ```shell
 openstack congress policy rule delete classification host_down
 ```
+
 ## Celiometer
+
+### Restart ceilometer
+controller nodes
+```shell
+service  openstack-ceilometer-api  restart    
+service openstack-ceilometer-notification restart
+service openstack-ceilometer-central  restart
+service openstack-ceilometer-collector  restart
+```
