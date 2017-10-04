@@ -1,32 +1,9 @@
-//migration
-2017-09-29 03:29:51.259 259353 ERROR congress.datasources.datasource_driver [-] 'ServerManager' object has no attribute 'live_migration'
-2017-09-29 03:29:51.259 259353 ERROR congress.datasources.datasource_driver Traceback (most recent call last):
-2017-09-29 03:29:51.259 259353 ERROR congress.datasources.datasource_driver   File "/usr/lib/python2.7/site-packages/congress/datasources/datasource_driver.py", line 1545, in _execute_api
-2017-09-29 03:29:51.259 259353 ERROR congress.datasources.datasource_driver     method = self._get_method(client, action)
-2017-09-29 03:29:51.259 259353 ERROR congress.datasources.datasource_driver   File "/usr/lib/python2.7/site-packages/congress/datasources/datasource_driver.py", line 1534, in _get_method
-2017-09-29 03:29:51.259 259353 ERROR congress.datasources.datasource_driver     method = reduce(getattr, method_name.split('.'), client)
-2017-09-29 03:29:51.259 259353 ERROR congress.datasources.datasource_driver AttributeError: 'ServerManager' object has no attribute 'live_migration'
-2017-09-29 03:29:51.259 259353 ERROR congress.datasources.datasource_driver 
-2017-09-29 03:29:51.267 259353 ERROR oslo_messaging.rpc.server [-] Exception during message handling
-2017-09-29 03:29:51.267 259353 ERROR oslo_messaging.rpc.server Traceback (most recent call last):
-2017-09-29 03:29:51.267 259353 ERROR oslo_messaging.rpc.server   File "/usr/lib/python2.7/site-packages/oslo_messaging/rpc/server.py", line 133, in _process_incoming
-2017-09-29 03:29:51.267 259353 ERROR oslo_messaging.rpc.server     res = self.dispatcher.dispatch(message)
-2017-09-29 03:29:51.267 259353 ERROR oslo_messaging.rpc.server   File "/usr/lib/python2.7/site-packages/oslo_messaging/rpc/dispatcher.py", line 150, in dispatch
-2017-09-29 03:29:51.267 259353 ERROR oslo_messaging.rpc.server     return self._do_dispatch(endpoint, method, ctxt, args)
-2017-09-29 03:29:51.267 259353 ERROR oslo_messaging.rpc.server   File "/usr/lib/python2.7/site-packages/oslo_messaging/rpc/dispatcher.py", line 121, in _do_dispatch
-2017-09-29 03:29:51.267 259353 ERROR oslo_messaging.rpc.server     result = func(ctxt, **new_args)
-2017-09-29 03:29:51.267 259353 ERROR oslo_messaging.rpc.server   File "/usr/lib/python2.7/site-packages/congress/datasources/datasource_driver.py", line 1180, in request_execute
-2017-09-29 03:29:51.267 259353 ERROR oslo_messaging.rpc.server     return self.service.request_execute(context, action, action_args)
-2017-09-29 03:29:51.267 259353 ERROR oslo_messaging.rpc.server   File "/usr/lib/python2.7/site-packages/congress/datasources/datasource_driver.py", line 1583, in request_execute
-2017-09-29 03:29:51.267 259353 ERROR oslo_messaging.rpc.server     self.execute(action, action_args)
-2017-09-29 03:29:51.267 259353 ERROR oslo_messaging.rpc.server   File "/usr/lib/python2.7/site-packages/congress/datasources/nova_driver.py", line 267, in execute
-2017-09-29 03:29:51.267 259353 ERROR oslo_messaging.rpc.server     self._execute_api(self.nova_client, action, action_args)
-2017-09-29 03:29:51.267 259353 ERROR oslo_messaging.rpc.server   File "/usr/lib/python2.7/site-packages/congress/datasources/datasource_driver.py", line 1553, in _execute_api
-2017-09-29 03:29:51.267 259353 ERROR oslo_messaging.rpc.server     % (self.name, action, action_args))
-2017-09-29 03:29:51.267 259353 ERROR oslo_messaging.rpc.server CongressException: driver nova tries to execute servers.live_migration on arguments {u'positional': [u'b1422437-1ca4-4c44-85cb-157c9e5cf832']} but the method isn't accepted as an executable method.
-
-
-
+/* openstack congress policy rule create \
+    --name live_migrate_vm classification \
+    'execute[nova:servers.live_migrate(vmid)] :-
+        host_down(host),
+        active_instance_in_host(vmid, host)'
+*/
 
 //migrate
 2017-09-29 03:43:49.455 259353 INFO congress.api.application [req-f9e2ea59-b8fb-4653-956a-735edfbbbc59 d1872afb977e4905bc924271bfac00ec bae48b758022451d93210404edbbd2b5 - - -] Handling request 'POST /v1/policies/classification/rules' with CollectionHandler(/v1/policies/(?P<policy_id>[^/]+)/rules$)
@@ -60,6 +37,41 @@
 2017-09-29 03:43:49.530 259353 ERROR oslo_messaging.rpc.server   File "/usr/lib/python2.7/site-packages/congress/datasources/datasource_driver.py", line 1553, in _execute_api
 2017-09-29 03:43:49.530 259353 ERROR oslo_messaging.rpc.server     % (self.name, action, action_args))
 2017-09-29 03:43:49.530 259353 ERROR oslo_messaging.rpc.server CongressException: driver nova tries to execute servers.live_migrate on arguments {u'positional': [u'b1422437-1ca4-4c44-85cb-157c9e5cf832']} but the method isn't accepted as an executable method.
+
+/* openstack congress policy rule create \
+    --name live_migrate_vm classification \
+    'execute[nova:servers.live_migrate(vmid,"overcloud-novacompute-1.opnfvlf.org")] :-
+        host_down(host),
+        active_instance_in_host(vmid, host)'
+*/
+
+965', u'overcloud-novacompute-1.opnfvlf.org']}
+2017-09-30 09:46:34.538 259353 ERROR congress.datasources.datasource_driver [-] live_migrate() takes at least 4 arguments (3 given)
+2017-09-30 09:46:34.538 259353 ERROR congress.datasources.datasource_driver Traceback (most recent call last):
+2017-09-30 09:46:34.538 259353 ERROR congress.datasources.datasource_driver   File "/usr/lib/python2.7/site-packages/congress/datasources/datasource_driver.py", line 1547, in _execute_api
+2017-09-30 09:46:34.538 259353 ERROR congress.datasources.datasource_driver     method(*positional_args, **named_args)
+2017-09-30 09:46:34.538 259353 ERROR congress.datasources.datasource_driver   File "/usr/lib/python2.7/site-packages/novaclient/api_versions.py", line 402, in substitution
+2017-09-30 09:46:34.538 259353 ERROR congress.datasources.datasource_driver     return methods[-1].func(obj, *args, **kwargs)
+2017-09-30 09:46:34.538 259353 ERROR congress.datasources.datasource_driver TypeError: live_migrate() takes at least 4 arguments (3 given)
+2017-09-30 09:46:34.538 259353 ERROR congress.datasources.datasource_driver 
+2017-09-30 09:46:34.540 259353 ERROR oslo_messaging.rpc.server [-] Exception during message handling
+2017-09-30 09:46:34.540 259353 ERROR oslo_messaging.rpc.server Traceback (most recent call last):
+2017-09-30 09:46:34.540 259353 ERROR oslo_messaging.rpc.server   File "/usr/lib/python2.7/site-packages/oslo_messaging/rpc/server.py", line 133, in _process_incoming
+2017-09-30 09:46:34.540 259353 ERROR oslo_messaging.rpc.server     res = self.dispatcher.dispatch(message)
+2017-09-30 09:46:34.540 259353 ERROR oslo_messaging.rpc.server   File "/usr/lib/python2.7/site-packages/oslo_messaging/rpc/dispatcher.py", line 150, in dispatch
+2017-09-30 09:46:34.540 259353 ERROR oslo_messaging.rpc.server     return self._do_dispatch(endpoint, method, ctxt, args)
+2017-09-30 09:46:34.540 259353 ERROR oslo_messaging.rpc.server   File "/usr/lib/python2.7/site-packages/oslo_messaging/rpc/dispatcher.py", line 121, in _do_dispatch
+2017-09-30 09:46:34.540 259353 ERROR oslo_messaging.rpc.server     result = func(ctxt, **new_args)
+2017-09-30 09:46:34.540 259353 ERROR oslo_messaging.rpc.server   File "/usr/lib/python2.7/site-packages/congress/datasources/datasource_driver.py", line 1180, in request_execute
+2017-09-30 09:46:34.540 259353 ERROR oslo_messaging.rpc.server     return self.service.request_execute(context, action, action_args)
+2017-09-30 09:46:34.540 259353 ERROR oslo_messaging.rpc.server   File "/usr/lib/python2.7/site-packages/congress/datasources/datasource_driver.py", line 1583, in request_execute
+2017-09-30 09:46:34.540 259353 ERROR oslo_messaging.rpc.server     self.execute(action, action_args)
+2017-09-30 09:46:34.540 259353 ERROR oslo_messaging.rpc.server   File "/usr/lib/python2.7/site-packages/congress/datasources/nova_driver.py", line 267, in execute
+2017-09-30 09:46:34.540 259353 ERROR oslo_messaging.rpc.server     LOG.error(action)
+2017-09-30 09:46:34.540 259353 ERROR oslo_messaging.rpc.server   File "/usr/lib/python2.7/site-packages/congress/datasources/datasource_driver.py", line 1553, in _execute_api
+2017-09-30 09:46:34.540 259353 ERROR oslo_messaging.rpc.server     % (self.name, action, action_args))
+2017-09-30 09:46:34.540 259353 ERROR oslo_messaging.rpc.server CongressException: driver nova tries to execute servers.live_migrate on arguments {u'positional': [u'6f7ce2f3-93a9-4266-9132-e22a38031965', u'overcloud-novacompute-1.opnfvlf.org']} but the method isn't accepted as an executable method.
+2017-09-30 09:46:34.540 259353 ERROR oslo_messaging.rpc.server 
 
 
 
