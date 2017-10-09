@@ -10,7 +10,25 @@ change external network external ip from 192.168.37.x to 192.168.32.x, then begi
 ```shell
 opnfv-deploy -v --virtual-cpus 8 --virtual-default-ram 64 --virtual-compute-ram 96 -n network_settings_2f11.yaml -d os-nosdn-nofeature-ha.yaml --debug
 ```
+other optional parameters:
+-    --deploy-settings | -d : Full path to deploy settings yaml file. Optional.  Defaults to null
+-   --inventory | -i : Full path to inventory yaml file. Required only for baremetal
+-    --net-settings | -n : Full path to network settings file. Optional.
+-   --ping-site | -p : site to use to verify IP connectivity. Optional. Defaults to 8.8.8.8
+-   --dnslookup-site : site to use to verify DNS resolution. Optional. Defaults to www.google.com
+-   --virtual | -v : Virtualize overcloud nodes instead of using baremetal.
+-   --no-post-config : disable Post Install configuration.
+-   --debug : enable debug output.
+-   --interactive : enable interactive deployment mode which requires user to confirm steps of deployment.
+-   --virtual-cpus : Number of CPUs to use per Overcloud VM in a virtual deployment (defaults to 4).
+-   --virtual-computes : Number of Virtual Compute nodes to create and use during deployment (defaults to 1 for noha and 2 for ha).
+-   --virtual-default-ram : Amount of default RAM to use per Overcloud VM in GB (defaults to 8).
+-   --virtual-compute-ram : Amount of RAM to use per Overcloud Compute VM in GB (defaults to 8). Overrides --virtual-default-ram arg for computes
 
+Example: one controller node (for POC convenience, noha), four compute nodes
+```shell
+ opnfv-deploy -v --virtual-cpus 16 --virtual-default-ram 64 --virtual-compute-ram 96 --virtual-computes 4 -n network_settings_mine.yaml -d os-nosdn-nofeature-noha.yaml --debug > apex.log
+```
 # Network Configuration Guide (Discard)
 ## Deploy OPNFV
 you had better use screen to avoid accidential disconnection caused by Internet
