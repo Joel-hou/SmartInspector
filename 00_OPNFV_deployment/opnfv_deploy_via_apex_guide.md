@@ -10,9 +10,9 @@ cd /etc/opnfv-apex/
 opnfv-deploy -v --virtual-cpus 8 --virtual-default-ram 64 --virtual-compute-ram 96 -n network_settings.yaml -d os-nosdn-nofeature-ha.yaml --debug
 ```
 other optional parameters:
--    --deploy-settings | -d : Full path to deploy settings yaml file. Optional.  Defaults to null
+-   --deploy-settings | -d : Full path to deploy settings yaml file. Optional.  Defaults to null
 -   --inventory | -i : Full path to inventory yaml file. Required only for baremetal
--    --net-settings | -n : Full path to network settings file. Optional.
+-   --net-settings | -n : Full path to network settings file. Optional.
 -   --ping-site | -p : site to use to verify IP connectivity. Optional. Defaults to 8.8.8.8
 -   --dnslookup-site : site to use to verify DNS resolution. Optional. Defaults to www.google.com
 -   --virtual | -v : Virtualize overcloud nodes instead of using baremetal.
