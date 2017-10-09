@@ -1,14 +1,13 @@
-# OPNFV Deployment via Apex
-Prepare for deployment
+# OPNFV Deployment Guide via Apex
+## Deploy OPNFV
+Note: you cann't edit network_settings.yaml file directly then execute opnfv deploy command, cause there should not be any dhcp server on the network used by OPNFV which may be not satisfied
+> See more details here:http://docs.opnfv.org/en/stable-danube/submodules/apex/docs/release/installation/requirements.html#network-requirements
+
+you had better use screen to avoid accidential disconnection caused by Internet
 ```shell
 opnfv-clean
 cd /etc/opnfv-apex/
-cp network_settings.yaml network_settings_2f11.yaml
-vim network_settings_2f11.yaml
-```
-change external network external ip from 192.168.37.x to 192.168.32.x, then begin deploy process
-```shell
-opnfv-deploy -v --virtual-cpus 8 --virtual-default-ram 64 --virtual-compute-ram 96 -n network_settings_2f11.yaml -d os-nosdn-nofeature-ha.yaml --debug
+opnfv-deploy -v --virtual-cpus 8 --virtual-default-ram 64 --virtual-compute-ram 96 -n network_settings.yaml -d os-nosdn-nofeature-ha.yaml --debug
 ```
 other optional parameters:
 -    --deploy-settings | -d : Full path to deploy settings yaml file. Optional.  Defaults to null
@@ -27,17 +26,8 @@ other optional parameters:
 
 Example: one controller node (for POC convenience, noha), four compute nodes
 ```shell
- opnfv-deploy -v --virtual-cpus 16 --virtual-default-ram 64 --virtual-compute-ram 96 --virtual-computes 4 -n network_settings_mine.yaml -d os-nosdn-nofeature-noha.yaml --debug > apex.log
+ opnfv-deploy -v --virtual-cpus 16 --virtual-default-ram 64 --virtual-compute-ram 96 --virtual-computes 4 -n network_settings.yaml -d os-nosdn-nofeature-noha.yaml --debug > apex.log
 ```
-# Network Configuration Guide (Discard)
-## Deploy OPNFV
-you had better use screen to avoid accidential disconnection caused by Internet
-```shell
-opnfv-clean
-cd /etc/opnfv-apex/
-opnfv-deploy -v --virtual-cpus 8 --virtual-default-ram 64 --virtual-compute-ram 96 -n network_settings.yaml -d os-nosdn-nofeature-ha.yaml --debug
-```
-
 ## Network configuration via Ansible 
 Make sure you hosts file was configured properly and you had better disable ssh hosts key checking to avoid further annnoying
 
