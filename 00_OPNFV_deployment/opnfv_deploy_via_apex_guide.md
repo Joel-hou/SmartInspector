@@ -1,4 +1,17 @@
-# Network Configuration Guide
+# OPNFV Deployment via Apex
+Prepare for deployment
+```shell
+opnfv-clean
+cd /etc/opnfv-apex/
+cp network_settings.yaml network_settings_2f11.yaml
+vim network_settings_2f11.yaml
+```
+change external network external ip from 192.168.37.x to 192.168.32.x, then begin deploy process
+```shell
+opnfv-deploy -v --virtual-cpus 8 --virtual-default-ram 64 --virtual-compute-ram 96 -n network_settings_2f11.yaml -d os-nosdn-nofeature-ha.yaml --debug
+```
+
+# Network Configuration Guide (Discard)
 ## Deploy OPNFV
 you had better use screen to avoid accidential disconnection caused by Internet
 ```shell
