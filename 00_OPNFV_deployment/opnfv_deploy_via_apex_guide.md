@@ -1,4 +1,8 @@
 # OPNFV Deployment Guide via Apex
+## Install Apex
+```shell
+
+```
 ## Deploy OPNFV
 Note: you cann't edit network_settings.yaml file directly then execute opnfv deploy command, cause there should not be any dhcp server on the network used by OPNFV which may be not satisfied
 > See more details here:http://docs.opnfv.org/en/stable-danube/submodules/apex/docs/release/installation/requirements.html#network-requirements
@@ -54,7 +58,7 @@ ansible-playbook opnfv_direct_internet_access_network_configuration_controller.y
 ### Compute nodes configuration (in your stack machine/ansible host machine)
 Make sure the ip which is on the same network with your Jumphost network dev is eth2 before execute this command
 ```shell
-ansible_playbook opnfv_direct_internet_access_network_configuration_compute.yml
+ansible-playbook opnfv_direct_internet_access_network_configuration_compute.yml
 ```
 If everything works fine, you should see all green output
 
