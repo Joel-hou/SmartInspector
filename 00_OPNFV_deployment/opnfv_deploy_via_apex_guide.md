@@ -1,7 +1,31 @@
 # OPNFV Deployment Guide via Apex
 ## Install Apex
 ```shell
-
+# install dependence
+# First setup the build environment
+yum groupinstall 'Development Tools'
+yum groupinstall 'Virtualization Host'
+# The line below installs RDO Ocata for the Euphrates release
+yum install -y https://repos.fedorapeople.org/repos/openstack/openstack-ocata/rdo-release-ocata-3.noarch.rpm
+yum install -y python2-virtualbmc
+# We also need the epel repository
+yum install -y epel-release
+yum install -y python-devel python-setuptools libguestfs-tools python2-oslo-config python2-debtcollector python-pip openssl-devel bsdtar createrepo
+# Needed for overcloud-opendaylight build:
+yum install -y libxml2-devel libxslt-devel python34-devel python34-pip
+pip3 install gitpython
+pip3 install pygerrit2
+yum update -y
+# reboot make sure changes take effect
+reboot
+# download necessary package
+wget http://artifacts.opnfv.org/apex/dependencies/python34-markupsafe-0.23-9.el7.centos.x86_64.rpm
+wget http://artifacts.opnfv.org/apex/dependencies/python3-jinja2-2.8-5.el7.centos.noarch.rpm
+wget http://artifacts.opnfv.org/apex/dependencies/python3-ipmi-0.3.0-1.noarch.rpm
+yum install -y python34-markupsafe-*.rpm python3-jinja2-*.rpm python3-ipmi-*.rpm
+# install apex
+cd /home/apex_pack
+yum install -y opnfv-apex-5.0-20170705.noarch.rpm opnfv-apex-onos-5.0-20170705.noarch.rpm opnfv-apex-common-5.0-20170705.noarch.rpm opnfv-apex-undercloud-5.0-20170705.noarch.rpm
 ```
 ## Deploy OPNFV
 Note: you cann't edit network_settings.yaml file directly then execute opnfv deploy command, cause there should not be any dhcp server on the network used by OPNFV which may be not satisfied
