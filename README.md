@@ -5,16 +5,16 @@ This is our OPNFV doctor project experimental configuration tutorials
 
 ![](doctor.png)
 
-The original goal of our project is the conversation is not interrupted when hardware error occurs such as NIC down, after a few tries, We provide two solution here:
-- Solution 1:
-- Solution 2:
+The original goal of our project is the conversation is not interrupted when hardware error occurs such as NIC down, after a few tries, We provide two use case here:
+- Use Case 1: immediately notification
+- Use Case 2: automatic fault recovery 
 
-We use zabbix as our Monitor, openstack congress as our Inspector. 
+We use zabbix as our Monitor, openstack congress as our Inspector. This turtorials gives you a rough overview of all processes.
 
 ## 0 OPNFV Deployment
 
 ### 00 Deployment via Apex 
-
+Make sure Apex is installed properly
 ```shell
 # on our real server 192.168.32.20,E7 with 512G ram
 screen -S apex_deploy_screen
@@ -28,7 +28,7 @@ opnfv-deploy -v --virtual-cpus 8 \
 
 ### 01 NAT (discard)
 
-If you openstack external network is not on the same network with your Jumphost (your real HW server),in order to make your external network have Internet access, NAT is necessary to forward your oepnstack external network out
+If you openstack external network is not on the same network with your Jumphost (your real HW server),in order to make your external network accessible, NAT is necessary to forward your oepnstack external network out.
 
 ```shell
 # on HW server
@@ -74,7 +74,7 @@ vncserver_listen=0.0.0.0
 
 ### 12 NFS Server
 
-Install&configure NFS server on one controller.
+Install&configure NFS server on one of openstack controller node.
 
 ```shell
 # on the controller
@@ -392,9 +392,9 @@ service openstack‐congress‐server restart
 source overcloudrc
 openstack congress datasource create doctor doctor
 ```
-
 Create policies needed
 
+- Use Case 1:
 ```shell
 openstack congress policy rule create \
     --name host_down classification \
@@ -417,7 +417,8 @@ openstack congress policy rule create \
         host_down(host),
         active_instance_in_host(vmid, host)'
 ```
-Change VM status to pause instead of error for live-migration policy
+VMs in error state can't be live-migrated, change VM status to pause instead of error for live-migration policy, and alarm rule should be created for all VMs to do live-migrate. application manager could receive mutiple notifications and do live-migrate and unpause operation, which is beyond our use case scope.
+
 ```shell
 openstack congress policy rule create \
     --name pause_vm_states classification \
@@ -425,14 +426,59 @@ openstack congress policy rule create \
         host_down(host),
         active_instance_in_host(vmid, host)'
 ```
-You should also change alarm rule query sentence
+You should also change alarm rule query condition. 
+- Use Case 2
+```shell
+openstack congress policy rule create \
+    --name host_down classification \
+    'host_down(host) :-
+        doctor:events(hostname=host, type="compute.host.down", status="down")'
+
+openstack congress policy rule create \
+    --name active_instance_in_host classification \
+    'active_instance_in_host(vmid, host) :-
+        nova:servers(id=vmid, host_name=host, status="ACTIVE")'
+
+
+
+
+openstack congress policy rule create \
+    --name live_migrate_vm classification \
+    'execute[nova:servers.live_migrate(vmid, "our_destination_host","False","False")] :-
+        host_down(host),
+        active_instance_in_host(vmid, host)'
+```
+live_migrate paremeter details here(from python-novaclient):
+```python
+ @api_versions.wraps('2.0', '2.24')
+    def live_migrate(self, server, host, block_migration, disk_over_commit):
+        """
+        Migrates a running instance to a new machine.
+
+        :param server: instance id which comes from nova list.
+        :param host: destination host name.
+        :param block_migration: if True, do block_migration.
+        :param disk_over_commit: if True, allow disk overcommit.
+        :returns: An instance of novaclient.base.TupleWithMeta
+        """
+        return self._action('os-migrateLive', server,
+                            {'host': host,
+                             'block_migration': block_migration,
+                             'disk_over_commit': disk_over_commit})
+```
+Disk Over Commit:
+If true, nova check disk space on the target host by maximum size from the disk image file defination, otherwise False indicates that checking by actual size of disk image file. 
+
 ### 22 Notification Configuration 
 
 > See https://docs.openstack.org/newton/config-reference/compute/config-options.html, https://docs.openstack.org/nova/14.0.7/notifications.html for details about Nova notify_on_state_change conguration.  
 > See https://docs.openstack.org/newton/config-reference/telemetry/samples/event_definitions.yaml.html for details about Ceilometer.  
 > See https://docs.openstack.org/aodh/latest/contributor/event-alarm.html, https://docs.openstack.org/aodh/latest/admin/telemetry-alarms.html#event-based-alarm, https://github.com/openstack/aodh/blob/master/aodh/notifier/rest.py for details about Aodh.
 > See https://lingxiankong.github.io/2017-07-04-ceilometer-notification.html for details about notification
-Usually, configuration should be done in all controller nodes 
+
+- Use Case 1:
+
+Usually, configuration should be done in all controller nodes ,and related service have to be restarted to make sure your changes take into effect.
 ```shell
 ssh heat-admin@192.0.2.x # ssh onto every controller
 sudo -i # root necessary for operations later
@@ -744,17 +790,12 @@ rake test[clearwater.opnfv] SIGNUP_CODE=secret ELLIS=192.168.32.208 PROXY=192.16
 
 ## 5 Make Your First Call 
 > See http://clearwater.readthedocs.io/en/stable/Making_your_first_call.html#making-calls-through-clearwater for details.
-
-Our communication system is 
-
-```
-Blink <-> Clearwater <-> Blink
-```
+You can use any of these software as your software phone:
+- Blink
 
 You can download `Blink` from http://icanblink.com/download/.
-
 ```
-Information needed:
+Information needed usually:
 
 - base DNS name: opnfv.clearwater (as <domain>)
 - Ellis URL: use IP
@@ -775,11 +816,13 @@ STUN/TURN/ICE      |
     Password       | <password>
     Use rport      | true (this is required if your SIP client is behind a NAT)
 ```
+- X-Lite
+
 Issues:
 - Connection lost after 15 seconds due to 'No ack received'
 - Both X-lite and Blink could not register successfully via TCP on one of our windows virtual machine, strangely on another windows virtual machine registering via tcp works properly
 
-## 6 Doctor Tests
+## 6 Official Doctor Tests Demo
 
 > See http://docs.opnfv.org/en/stable-danube/submodules/doctor/docs/development/overview/testing.html, https://wiki.opnfv.org/display/functest/ for details.
 
@@ -809,95 +852,7 @@ docker exec <container_id> functest testcase run doctor
 To be or not to be, that is a question :)
 
 ## 8 Extras
-
-### 80 Nova Service Force Down
-
-```shell
-# unset `down`
-nova service‐force‐down ‐‐unset overcloud‐novacompute‐2.opnfvlf.org nova-compute
-# set `down`
-nova service‐force‐down ‐‐set overcloud‐novacompute‐2.opnfvlf.org nova‐compute
-```
-
-### 81 Reset Instance's State
-
-```shell
-nova reset-state --active INSTANCE_ID
-```
-
-### 82 Migrate&Evacuate Commands
-
-```shell
-# Migrate a server. The new host will be selected by the scheduler
-nova migrate
-# Evacuate server from failed host
-nova host-evacuate
-# Migrate running server to a new machine
-nova live-migration
-# Live migrate all instances of the specified host to other available hosts
-nova host-evacuate-live
-# Cold migrate all instances off the specified host to other available hosts
-nova host-servers-migrate
-```
-
-### 83 Sync Configurations
-
-Modifications to the configruations on one controller should be applied to all the other controllers, so it is with compute nodes.
-
-### 84 Yardstick Test
-
-```shell
-## wiki
-### https://wiki.opnfv.org/display/yardstick
-## download & run
-docker pull opnfv/yardstick:latest
-docker run ‐itd ‐‐privileged ‐v /var/run/docker.sock:/var/run/docker.sock \
-    ‐‐name yardstick opnfv/yardstick:latest
-## interactive bash
-docker exec ‐it yardstick bash
-## test prepare
-yardstick env prepare
-## add identification
-### copy identification from undercloud /home/stack/overcloudrc
-vim /etc/yardstick/openstack.creds
-### use identification
-source /etc/yardstick/openstack.creds
-## run samples
-yardstick ‐d task start samples/ping.yaml
-## watch report
-cat /tmp/yardstick.out
-## delete yardstick
-docker stop yardstick && docker rm yardstick
-```
-
-### 85 Functest Test
-
-```shell
-## wiki
-### https://wiki.opnfv.org/display/functest
-## download & run
-docker pull opnfv/functest:latest
-docker run ‐itd ‐‐privileged ‐v /var/run/docker.sock:/var/run/docker.sock ‐‐
-name functest opnfv/functest:latest
-## interactive bash
-docker exec ‐it functest bash
-## download images
-download_images.sh /home/opnfv/functest/images/
-## add identification
-### copy identification from undercloud /home/stack/overcloudrc
-vim /home/opnfv/functest/conf/openstack.creds
-## test prepare
-functest env prepare
-### use identification
-source /home/opnfv/functest/conf/openstack.creds
-## show test tier
-functest tier list
-## run test
-functest testcase run connection_check
-functest testcase run vping_ssh
-```
-
-### 86 Other Notes
+### 81 Other Notes
 
 ```shell
 # goto undercloud
@@ -924,9 +879,9 @@ cfy teardown -f
 cfy deployments delete -d DEPLOYMENT_ID
 ```
 
-### 87 Error
+### 82 Error
 
-#### 870 Error When Deploying Cloudify
+#### 820 Error When Deploying Cloudify
 May be caused by openstack internal internet problem
 ```
 [192.168.32.195] run: curl --fail -XPOST localhost:8101/api/v2/provider/context?update=False -H "Content-Type: application/json" -d @/tmp/provider-context.json
@@ -945,7 +900,7 @@ Aborting.
 https://github.com/cloudify-cosmo/cloudify-manager-blueprints/issues/136
 https://groups.google.com/forum/#!topic/cloudify-users/7Vo2fUVlLks
 
-#### 871 abort-on-prompts Was Set to True
+#### 821 abort-on-prompts Was Set to True
 May be caused by ssh user wrong configuration,cloudify CLI machine was trying to ssh to manager machine by ubuntu,default user name should be centos, cloudify default value is centos, no need to change it.
 
 Another issue could cause this problem could be due to openstack internal problem, cloudify CLI successfully bootstrap a manager VM, then associate a floating ip to the VM in order to ssh to VM do some necessary configuration, the floating ip doesn't work properly, cloudify CLI bootstrap process will failed due to time out.
@@ -994,4 +949,3 @@ Aborting.
 ```
 ## Reference
 - https://wiki.opnfv.org/display/doctor/Doctor+Home
-- http://congress.readthedocs.io/en/latest/
