@@ -31,7 +31,13 @@ yum install -y opnfv-apex-5.0-20170705.noarch.rpm opnfv-apex-onos-5.0-20170705.n
 Note: you cann't edit network_settings.yaml file directly then execute opnfv deploy command, cause there should not be any dhcp server on the network used by OPNFV which may be not satisfied
 > See more details here:http://docs.opnfv.org/en/stable-danube/submodules/apex/docs/release/installation/requirements.html#network-requirements
 
-you had better use screen to avoid accidential disconnection caused by Internet
+You had better use screen to avoid accidential disconnection caused by Internet
+
+First edit network_settings.yaml file to suit your deployment environment, the network topology of our deployment is as following:
+```
+
+```
+
 ```shell
 opnfv-clean
 cd /etc/opnfv-apex/
