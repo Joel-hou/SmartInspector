@@ -24,7 +24,7 @@ sed -i "s/#unix_sock_group = \"libvirt\"/unix_sock_group = \"libvirt\"/g" /etc/l
 sed -i "s/#listen_tcp = 1/listen_tcp = 1/g" /etc/libvirt/libvirtd.conf
 sed -i "s/#listen_tls = 0/listen_tls = 0/g" /etc/libvirt/libvirtd.conf
 
-# edit /etc/libvirt/qemu.conf                  ok
+# edit /etc/libvirt/qemu.conf
 sed -i "s/#user = \"root\"/user = \"root\"/g" /etc/libvirt/qemu.conf
 sed -i "s/#group = \"root\"/group = \"root\"/g" /etc/libvirt/qemu.conf
 sed -i "s/#dynamic_ownership = 1/dynamic_ownership = 0/g" /etc/libvirt/qemu.conf

@@ -12,11 +12,11 @@ sudo echo "/var/lib/nova/instances 192.0.2.0/24(rw,sync,no_root_squash,insecure)
 sudo exportfs -rv
 sudo chmod o+x /var/lib/nova/instances 
 
-#edit /etc/idmapd.conf file                    ok
+#edit /etc/idmapd.conf file
 sudo sed -i "s/#Nobody-User = nobody/Nobody-User = nobody/g" /etc/idmapd.conf
 sudo sed -i "s/#Nobody-Group = nobody/Nobody-Group = nobody/g" /etc/idmapd.conf
 
-#edit /etc/libvirt/libvirtd.conf file          ok
+#edit /etc/libvirt/libvirtd.conf file 
 sudo sed -i "s/#auth_unix_ro = \"none\"/auth_unix_ro = \"none\"/g" /etc/libvirt/libvirtd.conf
 sudo sed -i "s/#auth_unix_rw = \"none\"/auth_unix_rw = \"none\"/g" /etc/libvirt/libvirtd.conf
 sudo sed -i "s/#auth_tcp = \"sasl\"/auth_tcp = \"none\"/g" /etc/libvirt/libvirtd.conf
@@ -26,7 +26,7 @@ sudo sed -i "s/#unix_sock_group = \"libvirt\"/unix_sock_group = \"libvirt\"/g" /
 sudo sed -i "s/#listen_tcp = 1/listen_tcp = 1/g" /etc/libvirt/libvirtd.conf
 sudo sed -i "s/#listen_tls = 0/listen_tls = 0/g" /etc/libvirt/libvirtd.conf
 
-# edit /etc/libvirt/qemu.conf                  ok
+# edit /etc/libvirt/qemu.conf
 sudo sed -i "s/#user = \"root\"/user = \"root\"/g" /etc/libvirt/qemu.conf
 sudo sed -i "s/#group = \"root\"/group = \"root\"/g" /etc/libvirt/qemu.conf
 sudo sed -i "s/#dynamic_ownership = 1/dynamic_ownership = 0/g" /etc/libvirt/qemu.conf
