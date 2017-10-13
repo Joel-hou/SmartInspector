@@ -28,20 +28,85 @@ cd /home/apex_pack
 yum install -y opnfv-apex-5.0-20170705.noarch.rpm opnfv-apex-onos-5.0-20170705.noarch.rpm opnfv-apex-common-5.0-20170705.noarch.rpm opnfv-apex-undercloud-5.0-20170705.noarch.rpm
 ```
 ## Deploy OPNFV
-Note: you cann't edit network_settings.yaml file directly then execute opnfv deploy command, cause there should not be any dhcp server on the network used by OPNFV which may be not satisfied
 > See more details here:http://docs.opnfv.org/en/stable-danube/submodules/apex/docs/release/installation/requirements.html#network-requirements
 
-You had better use screen to avoid accidential disconnection caused by Internet
-
-First edit network_settings.yaml file to suit your deployment environment, the network topology of our deployment is as following:
+- You had better use screen to avoid accidential disconnection caused by Internet
+- First edit "network_settings.yaml" file to suit your environment, Apex requires no dhcp server exists on external network during deployment. the ip address of our HW server is 192.168.32.20 and is on the network 192.168.32.0/24. Our external network configuration in "network_settings.yaml" file is as following(installer ip and cidr, gateway, floating_ip_range, overcloud_ip_range modified):
+```yaml
+  external:                          # Can contain 1 or more external networks
+    - public:                        # "public" network will be the network the installer VM attaches to
+      enabled: true
+      mtu: 1500                      # Public network MTU
+      installer_vm:                  # Network settings for the Installer VM on admin network (note only valid on 'public' external network)
+        nic_type: interface          # Indicates if this VM will be bridged to an interface, or to a bond
+        vlan: native
+        members:
+          - enp65s0f0                # Member Interface to bridge to for installer VM (use multiple values for bond)
+        ip: 192.168.32.151           # IP to assign to Installer VM on this network
+      cidr: 192.168.32.128/25
+      gateway: 192.168.32.151
+      floating_ip_range:
+        - 192.168.32.200
+        - 192.168.32.250             # Range to allocate to floating IPs for the public network with Neutron
+      overcloud_ip_range:
+        - 192.168.32.155
+        - 192.168.32.199             # Usable ip range for the overcloud node IPs (including VIPs) and last IP will be used for host
+                                     # bridge (i.e. br-public). If empty entire range is usable.  Cannot overlap with dhcp_range or introspection_range.
+      nic_mapping:                   # Mapping of network configuration for Overcloud Nodes
+        compute:                     # Mapping for compute profile (nodes that will be used as Compute nodes)
+          phys_type: interface       # Physical interface type (interface or bond)
+          vlan: native               # VLAN tag to use with this NIC
+          members:                   # Physical NIC members of this mapping (Single value allowed for interface phys_type)
+            - eth2
+        controller:                  # Mapping for controller profile (nodes that will be used as Controller nodes)
+          phys_type: interface
+          vlan: native
+          members:
+            - eth2
+      external_overlay:              # External network to be created in OpenStack by Services tenant
+          name: Public_internet
+          type: flat
+          gateway: 192.168.32.151
+    - private_cloud:                 # another external network
+      enabled: false
+      mtu: 1500
+      installer_vm:                  # Network settings for the Installer VM on admin network (note only valid on 'public' external network)
+        nic_type: interface          # Indicates if this VM will be bridged to an interface, or to a bond
+        vlan: 101
+        members:
+          - em1                      # Member Interface to bridge to for installer VM (use multiple values for bond)
+        ip: 192.168.38.1             # IP to assign to Installer VM on this network
+      cidr: 192.168.38.0/24
+      gateway: 192.168.38.1
+      floating_ip_range:
+        - 192.168.38.200
+        - 192.168.38.220             # Range to allocate to floating IPs for the public network with Neutron
+      overcloud_ip_range:
+        - 192.168.38.10
+        - 192.168.38.199             # Usable IP range for overcloud nodes (including VIPs), usually this is a shared subnet.
+                                     # Cannot overlap with dhcp_range or introspection_range.
+      nic_mapping:                   # Mapping of network configuration for Overcloud Nodes
+        compute:                     # Mapping for compute profile (nodes that will be used as Compute nodes)
+          phys_type: interface       # Physical interface type (interface or bond)
+          vlan: 101                  # VLAN tag to use with this NIC
+          members:                   # Physical NIC members of this mapping (Single value allowed for interface phys_type)
+            - eth2                   # Note, for Apex you may also use the logical nic name (found by nic order), such as "nic1"
+        controller:                  # Mapping for controller profile (nodes that will be used as Controller nodes)
+          phys_type: interface
+          vlan: 101
+          members:
+            - eth2
+      external_overlay:              # External network to be created in OpenStack by Services tenant
+          name: private_cloud
+          type: vlan
+          segmentation_id: 101
+          gateway: 192.168.38.1
 ```
-
-```
-
+OPNFV deployment
 ```shell
 opnfv-clean
 cd /etc/opnfv-apex/
-opnfv-deploy -v --virtual-cpus 8 --virtual-default-ram 64 --virtual-compute-ram 96 -n network_settings.yaml -d os-nosdn-nofeature-ha.yaml --debug
+opnfv-deploy -v --virtual-cpus 8  --virtual-default-ram 64 --virtual-computes 4 -n network_settings.yaml -d os-nosdn-nofeature-ha.yaml --debug > apex.log
 ```
 other optional parameters:
 -   --deploy-settings | -d : Full path to deploy settings yaml file. Optional.  Defaults to null
@@ -58,12 +123,26 @@ other optional parameters:
 -   --virtual-default-ram : Amount of default RAM to use per Overcloud VM in GB (defaults to 8).
 -   --virtual-compute-ram : Amount of RAM to use per Overcloud Compute VM in GB (defaults to 8). Overrides --virtual-default-ram arg for computes
 
-Example: one controller node (for POC convenience, noha), four compute nodes
+Example: one controller node (for configuration convenience, noha), four compute nodes
 ```shell
  opnfv-deploy -v --virtual-cpus 16 --virtual-default-ram 64 --virtual-compute-ram 96 --virtual-computes 4 -n network_settings.yaml -d os-nosdn-nofeature-noha.yaml --debug > apex.log
 ```
-Note: Under this condition, openstack external network cann't be directly accessed from outside. OPNFV Apex installer requires no dhcp server exists on openstack external network during deployment otherwise deployment will fail. On the other side, we need to make openstack external network accessible from outside in order to do vIMS test. Our solution is changing network configuration on controller and compute nodes after OPNFV fully deployment to make openstack external network accessible directly(By default, openstack external network is NAT to undercloud since we use virtual deployment).
+Note: 
 
+Under this condition, openstack external network cann't be directly accessed from outside. OPNFV Apex installer requires no dhcp server exists on openstack external network during deployment otherwise deployment will fail. On the other side, we need to make openstack external network accessible from outside in order to do vIMS test. Our solution is changing network configuration on controller and compute nodes after OPNFV fully deployment to make openstack external network accessible directly(By default, openstack external network is NAT to undercloud since we use virtual deployment), and one controller node is NOT going to work(openstack-nova-compute process fails after you change network configuration file), use 3 controller nodes instead.
+
+Trouble shooting:
+
+- Stack failed because no fixed ip avaliable
+```
+# edit network_settings.yaml
+# increase admin network dhcp_range 
+# example:
+dhcp_range:
+      - 192.0.2.2
+      - 192.0.2.30
+# should be enough for 3 controller nodes and 4 compute nodes deployment
+```
 ## Network configuration via Ansible 
 Make sure you hosts file was configured properly and you had better disable ssh hosts key checking to avoid further annnoying
 
