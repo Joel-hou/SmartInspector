@@ -62,6 +62,8 @@ Example: one controller node (for POC convenience, noha), four compute nodes
 ```shell
  opnfv-deploy -v --virtual-cpus 16 --virtual-default-ram 64 --virtual-compute-ram 96 --virtual-computes 4 -n network_settings.yaml -d os-nosdn-nofeature-noha.yaml --debug > apex.log
 ```
+Note: Under this condition, openstack external network cann't be directly accessed from outside. OPNFV Apex installer requires no dhcp server exists on openstack external network during deployment otherwise deployment will fail. On the other side, we need to make openstack external network accessible from outside in order to do vIMS test. Our solution is changing network configuration on controller and compute nodes after OPNFV fully deployment to make openstack external network accessible directly(By default, openstack external network is NAT to undercloud since we use virtual deployment).
+
 ## Network configuration via Ansible 
 Make sure you hosts file was configured properly and you had better disable ssh hosts key checking to avoid further annnoying
 
