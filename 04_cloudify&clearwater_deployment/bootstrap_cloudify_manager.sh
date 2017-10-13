@@ -109,6 +109,7 @@ function bootstrap_cloudify_manager(){
     ## first it will install plugins
     cfy bootstrap --install-plugins -p openstack-manager-blueprint.yaml \
     -i openstack-manager-blueprint-inputs.yaml
+    sleep 1
     ## second it will bootstrap the manager actually
     cfy bootstrap --install-plugins -p openstack-manager-blueprint.yaml \
     -i openstack-manager-blueprint-inputs.yaml
