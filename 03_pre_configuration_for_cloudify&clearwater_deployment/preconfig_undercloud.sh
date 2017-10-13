@@ -79,7 +79,7 @@ openstack quota set admin --instances 30
 ## increase limit of the number of CPU
 openstack quota set admin --cores 30
 # change security group quota via ansible
-ansible controller -m script -a "./change_security_group_quota.sh" --sudo
+ansible controller -m shell -a "sudo sed -i "s|^#quota_security_group.*$|quota_security_group = 50|" /etc/neutron/neutron.conf && sudo sed -i "s|^#quota_security_group_rule.*$|quota_security_group_rule = 500|" /etc/neutron/neutron.conf && sudo systemctl restart neutron-server" --sudo
 
 # wait virtual machine to start normally, time spent to boot a VM may depend your environment, 20s may be too short if you can't afford a good machine
 sleep 20
