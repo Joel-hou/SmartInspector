@@ -4,4 +4,5 @@
 stack_ip=192.0.2.1
 ssh-keygen -R $stack_ip
 # disable ssh host key checking, you don't have to type yes the first time
+# upload images
 scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -r images/ stack@$stack_ip:~/
