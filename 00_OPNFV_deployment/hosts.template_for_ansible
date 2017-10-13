@@ -1,3 +1,9 @@
+# hosts template
+
+# install nfs-server on controller-0
+[controller-0]
+192.0.2.12  ansible_ssh_user=heat-admin
+
 [controller]
 192.0.2.12  ansible_ssh_user=heat-admin
 192.0.2.19  ansible_ssh_user=heat-admin
