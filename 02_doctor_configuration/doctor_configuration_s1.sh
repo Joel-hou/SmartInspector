@@ -5,7 +5,7 @@ set -e
 source ~/overcloudrc
 
 # configuration for all controller nodes
-ansible controller -m script -a "./notification_configuration_controller.sh"
+ansible controller -m script -a "./notification_configuration_controller.sh" --sudo
 
 # create doctor datasource
 openstack congress datasource create doctor doctor
