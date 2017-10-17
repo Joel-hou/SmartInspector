@@ -40,17 +40,21 @@ class Migrate(object):
         auth=get_identity_auth()
         self.sess=session.Session(auth=auth)
         self.report_url = 'http://192.168.32.163:8774/v2.1'
+        self.vmid = args.vmid
         print ("report url:",self.report_url)
 
     def live_migrate(self):
+
         payload = [
             {
                 "os-migrateLive": {
-                "host": "01c0cadef72d47e28a672a76060d492c",
-                "block_migration": "auto",
-                "force": false
-            },
+                    "host": self.vmid,
+                    "block_migration": "auto",
+                    "force": "false"
+                }
+            }
         ]
+
         data = json.dumps(payload)
 
         headers = {
@@ -59,7 +63,7 @@ class Migrate(object):
             'X-Auth-Token':self.sess.get_token(),
         }
         print ("token:",self.sess.get_token())
-        requests.put(self.inspector_url, data=data, headers=headers)
+        requests.put(self.report_url, data=data, headers=headers)
         print ("live-migrate instruction has been sent")
 
 def get_args():
@@ -71,7 +75,7 @@ def get_args():
 def main():
     args=get_args()
     migrate = Migrate(args)
-    migrate.report_error()
+    migrate.live_migrate()
 
 if __name__ == '__main__':
     main()
