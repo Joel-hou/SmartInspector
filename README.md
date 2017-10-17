@@ -429,19 +429,19 @@ openstack congress policy rule create \
 You should also change alarm rule query condition. 
 - Use Case 2
 ```shell
+# event
 openstack congress policy rule create \
     --name host_down classification \
     'host_down(host) :-
         doctor:events(hostname=host, type="compute.host.down", status="down")'
 
+# find active instance on host
 openstack congress policy rule create \
     --name active_instance_in_host classification \
     'active_instance_in_host(vmid, host) :-
         nova:servers(id=vmid, host_name=host, status="ACTIVE")'
 
-
-
-
+# migrate affected VMs
 openstack congress policy rule create \
     --name live_migrate_vm classification \
     'execute[nova:servers.live_migrate(vmid, "our_destination_host","False","False")] :-
