@@ -467,7 +467,7 @@ live_migrate paremeter details here(from python-novaclient):
                              'disk_over_commit': disk_over_commit})
 ```
 Disk Over Commit:
-If true, nova check disk space on the target host by maximum size from the disk image file defination, otherwise False indicates that checking by actual size of disk image file. 
+If true, nova check disk space on the target host by maximum size from the disk image file defination, otherwise False indicates that checking by actual size of the disk image file. 
 
 ### 22 Notification Configuration 
 

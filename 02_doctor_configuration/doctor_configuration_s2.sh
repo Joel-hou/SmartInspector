@@ -23,7 +23,7 @@ openstack congress policy rule create \
 
 openstack congress policy rule create \
     --name live_migrate_vm classification \
-    'execute[nova:servers.live_migrate(vmid,"overcloud-novacompute-1.opnfvlf.org")] :-
+    'execute[nova:servers.live_migrate(vmid,"overcloud-novacompute-1.opnfvlf.org","False","False")] :-
         host_down(host),
         active_instance_in_host(vmid, host)'
 
