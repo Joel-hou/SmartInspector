@@ -1,0 +1,81 @@
+[stack@undercloud ~]$ nova --debug live-migration 75fc72f8-52f0-49dd-a2f4-80b81953924a
+DEBUG (extension:157) found extension EntryPoint.parse('v2token = keystoneauth1.loading._plugins.identity.v2:Token')
+DEBUG (extension:157) found extension EntryPoint.parse('v3oauth1 = keystoneauth1.extras.oauth1._loading:V3OAuth1')
+DEBUG (extension:157) found extension EntryPoint.parse('admin_token = keystoneauth1.loading._plugins.admin_token:AdminToken')
+DEBUG (extension:157) found extension EntryPoint.parse('v3oidcauthcode = keystoneauth1.loading._plugins.identity.v3:OpenIDConnectAuthorizationCode')
+DEBUG (extension:157) found extension EntryPoint.parse('v2password = keystoneauth1.loading._plugins.identity.v2:Password')
+DEBUG (extension:157) found extension EntryPoint.parse('v3samlpassword = keystoneauth1.extras._saml2._loading:Saml2Password')
+DEBUG (extension:157) found extension EntryPoint.parse('v3password = keystoneauth1.loading._plugins.identity.v3:Password')
+DEBUG (extension:157) found extension EntryPoint.parse('v3oidcaccesstoken = keystoneauth1.loading._plugins.identity.v3:OpenIDConnectAccessToken')
+DEBUG (extension:157) found extension EntryPoint.parse('v3oidcpassword = keystoneauth1.loading._plugins.identity.v3:OpenIDConnectPassword')
+DEBUG (extension:157) found extension EntryPoint.parse('v3kerberos = keystoneauth1.extras.kerberos._loading:Kerberos')
+DEBUG (extension:157) found extension EntryPoint.parse('token = keystoneauth1.loading._plugins.identity.generic:Token')
+DEBUG (extension:157) found extension EntryPoint.parse('v3oidcclientcredentials = keystoneauth1.loading._plugins.identity.v3:OpenIDConnectClientCredentials')
+DEBUG (extension:157) found extension EntryPoint.parse('v3tokenlessauth = keystoneauth1.loading._plugins.identity.v3:TokenlessAuth')
+DEBUG (extension:157) found extension EntryPoint.parse('v3token = keystoneauth1.loading._plugins.identity.v3:Token')
+DEBUG (extension:157) found extension EntryPoint.parse('v3totp = keystoneauth1.loading._plugins.identity.v3:TOTP')
+DEBUG (extension:157) found extension EntryPoint.parse('password = keystoneauth1.loading._plugins.identity.generic:Password')
+DEBUG (extension:157) found extension EntryPoint.parse('v3fedkerb = keystoneauth1.extras.kerberos._loading:MappedKerberos')
+DEBUG (extension:157) found extension EntryPoint.parse('token_endpoint = openstackclient.api.auth_plugin:TokenEndpoint')
+DEBUG (extension:157) found extension EntryPoint.parse('gnocchi-basic = gnocchiclient.auth:GnocchiBasicLoader')
+DEBUG (extension:157) found extension EntryPoint.parse('gnocchi-noauth = gnocchiclient.auth:GnocchiNoAuthLoader')
+DEBUG (extension:157) found extension EntryPoint.parse('aodh-noauth = aodhclient.noauth:AodhNoAuthLoader')
+DEBUG (session:342) REQ: curl -g -i -X GET http://192.168.32.163:5000/v2.0 -H "Accept: application/json" -H "User-Agent: nova keystoneauth1/2.12.3 python-requests/2.11.1 CPython/2.7.5"
+INFO (connectionpool:214) Starting new HTTP connection (1): 192.168.32.163
+DEBUG (connectionpool:401) "GET /v2.0 HTTP/1.1" 200 232
+DEBUG (session:390) RESP: [200] Date: Tue, 17 Oct 2017 09:06:31 GMT Server: Apache Vary: X-Auth-Token,Accept-Encoding x-openstack-request-id: req-f197c525-ecdc-4c8d-b2cb-2d603c75ce09 Content-Encoding: gzip Content-Length: 232 Content-Type: application/json 
+RESP BODY: {"version": {"status": "deprecated", "updated": "2016-08-04T00:00:00Z", "media-types": [{"base": "application/json", "type": "application/vnd.openstack.identity-v2.0+json"}], "id": "v2.0", "links": [{"href": "http://192.168.32.163:5000/v2.0/", "rel": "self"}, {"href": "http://docs.openstack.org/", "type": "text/html", "rel": "describedby"}]}}
+
+DEBUG (v2:63) Making authentication request to http://192.168.32.163:5000/v2.0/tokens
+DEBUG (connectionpool:401) "POST /v2.0/tokens HTTP/1.1" 200 1118
+REQ: curl -g -i -X GET http://192.168.32.163:8774/v2.1 -H "User-Agent: python-novaclient" -H "Accept: application/json" -H "X-Auth-Token: {SHA1}01adfb7f1eb9a0ae5bd4a342eeef867a626f6429"
+DEBUG (session:342) REQ: curl -g -i -X GET http://192.168.32.163:8774/v2.1 -H "User-Agent: python-novaclient" -H "Accept: application/json" -H "X-Auth-Token: {SHA1}01adfb7f1eb9a0ae5bd4a342eeef867a626f6429"
+INFO (connectionpool:214) Starting new HTTP connection (1): 192.168.32.163
+DEBUG (connectionpool:401) "GET /v2.1 HTTP/1.1" 302 0
+RESP: [302] Content-Type: text/plain; charset=utf8 Location: http://192.168.32.163:8774/v2.1/ X-Compute-Request-Id: req-898d2c74-b658-4f5b-aeef-06e4ec62d4fa Content-Length: 0 Date: Tue, 17 Oct 2017 09:06:32 GMT 
+RESP BODY: Omitted, Content-Type is set to text/plain; charset=utf8. Only application/json responses have their bodies logged.
+
+DEBUG (session:390) RESP: [302] Content-Type: text/plain; charset=utf8 Location: http://192.168.32.163:8774/v2.1/ X-Compute-Request-Id: req-898d2c74-b658-4f5b-aeef-06e4ec62d4fa Content-Length: 0 Date: Tue, 17 Oct 2017 09:06:32 GMT 
+RESP BODY: Omitted, Content-Type is set to text/plain; charset=utf8. Only application/json responses have their bodies logged.
+
+DEBUG (connectionpool:401) "GET /v2.1/ HTTP/1.1" 200 388
+RESP: [200] Content-Length: 388 Content-Type: application/json Openstack-Api-Version: compute 2.1 X-Openstack-Nova-Api-Version: 2.1 Vary: OpenStack-API-Version, X-OpenStack-Nova-API-Version X-Compute-Request-Id: req-8a7e7103-0063-4bef-982c-165a6c2b81ef Date: Tue, 17 Oct 2017 09:06:32 GMT 
+RESP BODY: {"version": {"status": "CURRENT", "updated": "2013-07-23T11:33:21Z", "links": [{"href": "http://192.168.32.163:8774/v2.1/", "rel": "self"}, {"href": "http://docs.openstack.org/", "type": "text/html", "rel": "describedby"}], "min_version": "2.1", "version": "2.38", "media-types": [{"base": "application/json", "type": "application/vnd.openstack.compute+json;version=2.1"}], "id": "v2.1"}}
+
+DEBUG (session:390) RESP: [200] Content-Length: 388 Content-Type: application/json Openstack-Api-Version: compute 2.1 X-Openstack-Nova-Api-Version: 2.1 Vary: OpenStack-API-Version, X-OpenStack-Nova-API-Version X-Compute-Request-Id: req-8a7e7103-0063-4bef-982c-165a6c2b81ef Date: Tue, 17 Oct 2017 09:06:32 GMT 
+RESP BODY: {"version": {"status": "CURRENT", "updated": "2013-07-23T11:33:21Z", "links": [{"href": "http://192.168.32.163:8774/v2.1/", "rel": "self"}, {"href": "http://docs.openstack.org/", "type": "text/html", "rel": "describedby"}], "min_version": "2.1", "version": "2.38", "media-types": [{"base": "application/json", "type": "application/vnd.openstack.compute+json;version=2.1"}], "id": "v2.1"}}
+
+GET call to compute for http://192.168.32.163:8774/v2.1/ used request id req-8a7e7103-0063-4bef-982c-165a6c2b81ef
+DEBUG (client:85) GET call to compute for http://192.168.32.163:8774/v2.1/ used request id req-8a7e7103-0063-4bef-982c-165a6c2b81ef
+DEBUG (extension:157) found extension EntryPoint.parse('v2token = keystoneauth1.loading._plugins.identity.v2:Token')
+DEBUG (extension:157) found extension EntryPoint.parse('v3oauth1 = keystoneauth1.extras.oauth1._loading:V3OAuth1')
+DEBUG (extension:157) found extension EntryPoint.parse('admin_token = keystoneauth1.loading._plugins.admin_token:AdminToken')
+DEBUG (extension:157) found extension EntryPoint.parse('v3oidcauthcode = keystoneauth1.loading._plugins.identity.v3:OpenIDConnectAuthorizationCode')
+DEBUG (extension:157) found extension EntryPoint.parse('v2password = keystoneauth1.loading._plugins.identity.v2:Password')
+DEBUG (extension:157) found extension EntryPoint.parse('v3samlpassword = keystoneauth1.extras._saml2._loading:Saml2Password')
+DEBUG (extension:157) found extension EntryPoint.parse('v3password = keystoneauth1.loading._plugins.identity.v3:Password')
+DEBUG (extension:157) found extension EntryPoint.parse('v3oidcaccesstoken = keystoneauth1.loading._plugins.identity.v3:OpenIDConnectAccessToken')
+DEBUG (extension:157) found extension EntryPoint.parse('v3oidcpassword = keystoneauth1.loading._plugins.identity.v3:OpenIDConnectPassword')
+DEBUG (extension:157) found extension EntryPoint.parse('v3kerberos = keystoneauth1.extras.kerberos._loading:Kerberos')
+DEBUG (extension:157) found extension EntryPoint.parse('token = keystoneauth1.loading._plugins.identity.generic:Token')
+DEBUG (extension:157) found extension EntryPoint.parse('v3oidcclientcredentials = keystoneauth1.loading._plugins.identity.v3:OpenIDConnectClientCredentials')
+DEBUG (extension:157) found extension EntryPoint.parse('v3tokenlessauth = keystoneauth1.loading._plugins.identity.v3:TokenlessAuth')
+DEBUG (extension:157) found extension EntryPoint.parse('v3token = keystoneauth1.loading._plugins.identity.v3:Token')
+DEBUG (extension:157) found extension EntryPoint.parse('v3totp = keystoneauth1.loading._plugins.identity.v3:TOTP')
+DEBUG (extension:157) found extension EntryPoint.parse('password = keystoneauth1.loading._plugins.identity.generic:Password')
+DEBUG (extension:157) found extension EntryPoint.parse('v3fedkerb = keystoneauth1.extras.kerberos._loading:MappedKerberos')
+DEBUG (extension:157) found extension EntryPoint.parse('token_endpoint = openstackclient.api.auth_plugin:TokenEndpoint')
+DEBUG (extension:157) found extension EntryPoint.parse('gnocchi-basic = gnocchiclient.auth:GnocchiBasicLoader')
+DEBUG (extension:157) found extension EntryPoint.parse('gnocchi-noauth = gnocchiclient.auth:GnocchiNoAuthLoader')
+DEBUG (extension:157) found extension EntryPoint.parse('aodh-noauth = aodhclient.noauth:AodhNoAuthLoader')
+DEBUG (session:342) REQ: curl -g -i -X GET http://192.168.32.163:8774/v2.1/servers/75fc72f8-52f0-49dd-a2f4-80b81953924a -H "OpenStack-API-Version: compute 2.37" -H "User-Agent: python-novaclient" -H "Accept: application/json" -H "X-OpenStack-Nova-API-Version: 2.37" -H "X-Auth-Token: {SHA1}01adfb7f1eb9a0ae5bd4a342eeef867a626f6429"
+DEBUG (connectionpool:401) "GET /v2.1/servers/75fc72f8-52f0-49dd-a2f4-80b81953924a HTTP/1.1" 200 2091
+DEBUG (session:390) RESP: [200] Content-Length: 2091 Content-Type: application/json Openstack-Api-Version: compute 2.37 X-Openstack-Nova-Api-Version: 2.37 Vary: OpenStack-API-Version, X-OpenStack-Nova-API-Version X-Compute-Request-Id: req-dd7d0c4a-150b-45c0-9396-a0688d78543c Date: Tue, 17 Oct 2017 09:06:32 GMT 
+RESP BODY: {"server": {"OS-EXT-STS:task_state": null, "addresses": {"test_zhian": [{"OS-EXT-IPS-MAC:mac_addr": "fa:16:3e:e1:9f:62", "version": 4, "addr": "192.168.22.5", "OS-EXT-IPS:type": "fixed"}, {"OS-EXT-IPS-MAC:mac_addr": "fa:16:3e:e1:9f:62", "version": 4, "addr": "192.168.32.200", "OS-EXT-IPS:type": "floating"}]}, "links": [{"href": "http://192.168.32.163:8774/v2.1/servers/75fc72f8-52f0-49dd-a2f4-80b81953924a", "rel": "self"}, {"href": "http://192.168.32.163:8774/servers/75fc72f8-52f0-49dd-a2f4-80b81953924a", "rel": "bookmark"}], "image": {"id": "2206204f-3678-4cef-99bc-4bafb1d84bec", "links": [{"href": "http://192.168.32.163:8774/images/2206204f-3678-4cef-99bc-4bafb1d84bec", "rel": "bookmark"}]}, "OS-EXT-SRV-ATTR:user_data": null, "OS-EXT-STS:vm_state": "active", "OS-EXT-SRV-ATTR:instance_name": "instance-00000002", "OS-EXT-SRV-ATTR:root_device_name": "/dev/vda", "OS-SRV-USG:launched_at": "2017-10-13T08:28:05.000000", "flavor": {"id": "2", "links": [{"href": "http://192.168.32.163:8774/flavors/2", "rel": "bookmark"}]}, "id": "75fc72f8-52f0-49dd-a2f4-80b81953924a", "security_groups": [{"name": "default"}], "OS-SRV-USG:terminated_at": null, "os-extended-volumes:volumes_attached": [], "user_id": "4643ca3da13648f99c7014801b6d0b65", "OS-EXT-SRV-ATTR:hostname": "test-zhian", "OS-DCF:diskConfig": "MANUAL", "accessIPv4": "", "accessIPv6": "", "OS-EXT-SRV-ATTR:reservation_id": "r-mzl0s3kq", "progress": 0, "OS-EXT-STS:power_state": 1, "OS-EXT-AZ:availability_zone": "nova", "metadata": {}, "status": "ACTIVE", "OS-EXT-SRV-ATTR:ramdisk_id": "", "updated": "2017-10-17T07:21:16Z", "hostId": "a0eb927ca8b7a4953a1a15fbe05b224356c5dd77aa37c8a9e1a675e9", "OS-EXT-SRV-ATTR:host": "overcloud-novacompute-2.opnfvlf.org", "description": "newbie", "tags": [], "key_name": "newbie", "OS-EXT-SRV-ATTR:kernel_id": "", "locked": false, "OS-EXT-SRV-ATTR:hypervisor_hostname": "overcloud-novacompute-2.opnfvlf.org", "name": "test_zhian", "OS-EXT-SRV-ATTR:launch_index": 0, "created": "2017-10-13T08:27:45Z", "tenant_id": "07fd0c7c4eb94fb18c50d76c8562f6f3", "host_status": "UP", "config_drive": ""}}
+
+DEBUG (client:85) GET call to compute for http://192.168.32.163:8774/v2.1/servers/75fc72f8-52f0-49dd-a2f4-80b81953924a used request id req-dd7d0c4a-150b-45c0-9396-a0688d78543c
+DEBUG (session:342) REQ: curl -g -i -X POST http://192.168.32.163:8774/v2.1/servers/75fc72f8-52f0-49dd-a2f4-80b81953924a/action -H "Accept: application/json" -H "User-Agent: python-novaclient" -H "OpenStack-API-Version: compute 2.37" -H "X-OpenStack-Nova-API-Version: 2.37" -H "X-Auth-Token: {SHA1}01adfb7f1eb9a0ae5bd4a342eeef867a626f6429" -H "Content-Type: application/json" -d '{"os-migrateLive": {"block_migration": "auto", "host": null}}'
+DEBUG (connectionpool:401) "POST /v2.1/servers/75fc72f8-52f0-49dd-a2f4-80b81953924a/action HTTP/1.1" 202 0
+DEBUG (session:390) RESP: [202] Content-Length: 0 Content-Type: application/json Openstack-Api-Version: compute 2.37 X-Openstack-Nova-Api-Version: 2.37 Vary: OpenStack-API-Version, X-OpenStack-Nova-API-Version X-Compute-Request-Id: req-8bc049ef-5360-4428-895a-a9da461b27d0 Date: Tue, 17 Oct 2017 09:06:33 GMT
+DEBUG (client:85) POST call to compute for http://192.168.32.163:8774/v2.1/servers/75fc72f8-52f0-49dd-a2f4-80b81953924a/action used request id req-8bc049ef-5360-4428-895a-a9da461b27d0
+[stack@undercloud ~]$ 
