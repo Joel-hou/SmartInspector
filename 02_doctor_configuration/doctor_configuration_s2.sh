@@ -21,9 +21,10 @@ openstack congress policy rule create \
     'active_instance_in_host(vmid, host) :-
         nova:servers(id=vmid, host_name=host, status="ACTIVE")'
 
+# make compute 3 node as our fault recovery default compute node
 openstack congress policy rule create \
     --name live_migrate_vm classification \
-    'execute[nova:servers.live_migrate(vmid,"overcloud-novacompute-1.opnfvlf.org","False","False")] :-
+    'execute[nova:servers.live_migrate(vmid,"overcloud-novacompute-3.opnfvlf.org","False","False")] :-
         host_down(host),
         active_instance_in_host(vmid, host)'
 
