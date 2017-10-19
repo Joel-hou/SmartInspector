@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# on stack VM overcloud, please make sure your environment variable is clean
+# on stack VM overcloud, please make sure that your environment variable is clean
 set -e
 source ~/overcloudrc
 
@@ -11,9 +11,11 @@ ansible controller -m script -a "./notification_configuration_controller.sh" --s
 openstack congress datasource create doctor doctor
 
 # add policy
-# xuan xue:Syntax error for rule::Literal doctor:events(hostname=host, status="down", type="compute.host.down") uses named arguments, but the schema is unknown.
-# the following line should work
-openstack congress policy rule create     --name host_down classification     'host_down(host) :-
+# Note:"Syntax error for rule::Literal doctor:events(hostname=host, status="down", type="compute.host.down") 
+# uses named arguments, but the schema is unknown." may be caused by no doctor datasource created
+openstack congress policy rule create \
+    --name host_down classification \
+         'host_down(host) :-
         doctor:events(hostname=host, type="compute.host.down", status="down")'
 
 openstack congress policy rule create \
