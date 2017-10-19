@@ -119,3 +119,30 @@ service openstack-ceilometer-notification restart
 service openstack-ceilometer-central  restart
 service openstack-ceilometer-collector  restart
 ```
+
+## Other useful tips  
+- Get token from keystone
+```shell
+curl -H "Content-Type: application/json" -X POST -d '
+{
+    "auth": {
+        "tenantName": "admin",
+        "passwordCredentials": {
+            "username": "admin",
+            "password": "ngn2s6cpAeZn7cgnNyHzcE4Cf"
+        }
+    }
+}
+' http://192.168.32.163:35357/v2.0/tokens \
+  | python -m json.too
+```
+
+- Migrate VM via curl restful API 
+```shell
+curl -g -i -X POST http://192.168.32.163:8774/v2.1/servers/75fc72f8-52f0-49dd-a2f4-80b81953924a/action \
+    -H "Accept: application/json" -H "User-Agent: python-novaclient" -H "OpenStack-API-Version: compute 2.34" \
+    -H "X-OpenStack-Nova-API-Version: 2.34" \
+    -H "X-Auth-Token: $OS_TOKEN" \
+    -H "Content-Type: application/json" \
+    -d '{"os-migrateLive": {"block_migration": "False", "host": "overcloud-novacompute-1.opnfvlf.org", "force": "True"}}'
+```
