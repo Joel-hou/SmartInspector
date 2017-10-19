@@ -207,3 +207,8 @@ neutron subnet-delete external-net
 neutron subnet-create external 192.168.32.0/24  --name  external-net --dns-nameserver 8.8.8.8 --gateway 192.168.32.1 --allocation-pool start=192.168.32.191,end=192.168.32.250  
 ```
 
+## Install congress dashboard
+
+```shell
+
+```
