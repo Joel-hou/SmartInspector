@@ -134,7 +134,7 @@ curl -H "Content-Type: application/json" -X POST -d '
     }
 }
 ' http://192.168.32.163:35357/v2.0/tokens \
-  | python -m json.too
+  | python -m json.tool
 ```
 
 - Migrate VM via curl restful API 
