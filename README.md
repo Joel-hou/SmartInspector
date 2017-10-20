@@ -5,16 +5,16 @@ This is our OPNFV doctor project experimental configuration tutorials
 
 ![](doctor.png)
 
-The original goal of our project is the conversation is not interrupted when hardware error occurs such as NIC down, after a few tries, We provide two use case here:
+The original goal of our project is our phone session is not interrupted when hardware error occurs such as NIC down, after a few tries, We provide two use cases here:
 - Use Case 1: immediately notification
 - Use Case 2: automatic fault recovery 
 
-We use zabbix as our Monitor, openstack congress as our Inspector. This turtorials gives you a rough overview of all processes.
+We use zabbix as our Monitor, openstack congress as our Inspector. This turtorials gives you a rough overview of all necessary process.
 
 ## 0 OPNFV Deployment
 
 ### 00 Deployment via Apex 
-Make sure Apex is installed properly
+Make sure Apex is installed properly firstly
 ```shell
 # on our real server 192.168.32.20,E7 with 512G ram
 screen -S apex_deploy_screen
