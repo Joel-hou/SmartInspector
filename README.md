@@ -1054,9 +1054,10 @@ Fatal error: Needed to prompt for a connection or sudo password (host: 192.168.3
 
 Aborting.
 ```
-This may be caused by ssh user wrong configuration,cloudify CLI machine was trying to ssh to manager machine by ubuntu,default user name should be centos, cloudify default value is centos, no need to change it.
 
-Another reason could cause this problem may due to openstack internal problem, cloudify CLI successfully bootstrap a manager VM, then associate a floating ip to the VM in order to ssh to VM do some necessary configuration, the floating ip is assigned but your ping test cannot reached. Cloudify CLI bootstrap process will fail because of time out. Try to reinstall OPNFV is you have no better idea.
+- This may be caused by ssh user wrong configuration,cloudify CLI machine was trying to ssh to manager machine by ubuntu,default user name should be centos, cloudify default value is centos, no need to change it.
+
+- Another reason could cause this problem may due to openstack internal problem, cloudify CLI successfully bootstrap a manager VM, then associate a floating ip to the VM in order to ssh to VM do some necessary configuration, the floating ip is assigned but your ping test cannot reached. Cloudify CLI bootstrap process will fail because of time out. Try to reinstall OPNFV if you have no better idea.
 
 ## Reference
 - https://wiki.opnfv.org/display/doctor/Doctor+Home
