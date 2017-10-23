@@ -10,4 +10,4 @@ iptables -A FORWARD -m state --state ESTABLISHED,RELATED -j ACCEPT
 
 opnfv-clean
 cd /etc/opnfv-apex 
-opnfv-deploy -v --virtual-cpus 8  --virtual-default-ram 64 --virtual-computes 4 -n network_settings.yaml -d os-nosdn-nofeature-ha.yaml --debug > apex.log
+opnfv-deploy -v --virtual-cpus 8  --virtual-default-ram 64 --virtual-computes 4 -n network_settings.yaml -d os-nosdn-nofeature-ha.yaml --debug > apex.log 

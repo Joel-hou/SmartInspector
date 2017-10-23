@@ -1,58 +1,51 @@
 [TOC]
 
 # Smart Inspector 
-This is our OPNFV doctor project experimental configuration tutorials
+This is our Smart Inspector project based on OPNFV doctor experimental configuration tutorials.
 
 ![](doctor.png)
 
-The original goal of our project is our phone session is not interrupted when hardware error occurs such as NIC down, after a few tries, We provide two use cases here:
-- Use Case 1: immediately notification
-- Use Case 2: automatic fault recovery 
+The original goal of our project is keeping our phone session connected when hardware error occurs such as NIC down, We provide two use cases here after a few tries:
+- Use Case 1: Immediately notification
+- Use Case 2: Automatic fault recovery 
 
-We use zabbix as our Monitor, openstack congress as our Inspector. This turtorials gives you a rough overview of all necessary process.
+We use zabbix as our Monitor, openstack congress as our Inspector. This turtorials gives you a overview of all necessary process, for detailed configuration , please refer to the scripts in subfolders.   
 
 ## 0 OPNFV Deployment
 
 ### 00 Deployment via Apex 
-Make sure Apex is installed properly firstly
+Make sure Apex is installed properly,
 ```shell
-# on our real server 192.168.32.20,E7 with 512G ram
-screen -S apex_deploy_screen
+# on our jumphost, 192.168.32.20, E7 with 512G ram
+screen -S deploy_opnfv_screen
 opnfv-clean
 cd /etc/opnfv-apex 
 # in screen apex_deploy_screen
-opnfv-deploy -v --virtual-cpus 8 \
-    --virtual-default-ram 64 --virtual-compute-ram 96 \
-    -n network_settings.yaml -d os-nosdn-nofeature-ha.yaml --debug > apex.log
+opnfv-deploy -v --virtual-cpus 8  --virtual-default-ram 64 --virtual-computes 4 -n network_settings.yaml -d os-nosdn-nofeature-ha.yaml --debug > apex.log
 ```
+The process may take one and a half hours, mainly depend on your jumphost performance.
 
-### 01 NAT (discard)
+### 01 NAT (not necessary)
 
-If you openstack external network is not on the same network with your Jumphost (your real HW server),in order to make your external network accessible, NAT is necessary to forward your oepnstack external network out.
+To make your undercloud VM have access to the Internet, NAT forwarding is needed. The idea is based on that your undercloud VM is connected to jumphost via virbr0(the libvirt bridge), you can do this easily via Linux iptables. You can do this if you want to but not necessary for our project configuration.
 
 ```shell
-# on HW server
-## allow forward
+# on jumphost 
+# enable ipv4 forward
 sysctl net.ipv4.ip_forward=1
-#iptables -t nat -A POSTROUTING -s your_openstack_external_network_ip/netmask -j SNAT --to your_HW_network_ip
+#iptables -t nat -A POSTROUTING -s your_undercloud_VM_network_ip(vir-br0 network)/netmask -j SNAT --to your_jumphost_ip
 # example:
 iptables -t nat -A POSTROUTING -s 192.168.122.0/24 -j SNAT --to 192.168.32.20
 iptables -A FORWARD -m state --state ESTABLISHED,RELATED -j ACCEPT
 ```
 
-### 02 Dashboard (discard)
+### 02 Network Configuration
 
-To visit dashboard behind NAT from your local browser.
+After network configuration steps, your openstack external network is the same with jumphost, you can visit openstack dashboard directly if your laptop are in the same network with jumphost or your laptop is NAT to your jumphost gateway. This is necessary because our soft phone is going to register to ellis(component of clearwater) which is on openstack external network.
 
-```shell
-# on HW server
-screen -S opnfv_dashboard
-# your can find proper ip address in your overcloudrc file
-socat tcp-l:10001,reuseaddr,fork tcp:192.168.37.18:80
-# press ctrl-a d to detatch from current screen
-## the firewalld may block some connections
-service firewalld stop
-```
+Read 00_OPNFV_deployment/opnfv_deploy_via_apex_guide.md for specific instructions. 
+
+Now you can visit openstack dashboard from your local browser.
 
 ## 1 OpenStack Live Migration Configurations
 
@@ -135,7 +128,6 @@ vim /etc/fstab
 192.0.2.5:/var/lib/nova/instances /var/lib/nova/instances nfs defaults 0 0
 
 mount -a -v
-
 # to check whether mount succeeds
 df -k
 
@@ -161,9 +153,7 @@ vnc_listen = "0.0.0.0"
 user = "root"
 group = "root"
 dynamic_ownership = 0
-
 usermod nova -a -G libvirt
-
 vim /etc/sysconfig/libvirtd
 # ensure things below
 LIBVIRTD_ARGS="--listen"
@@ -299,30 +289,122 @@ PUT /v1/data‐sources/doctor/tables/events/rows
 1. curl KeyStone RESTful API using HTTP POST for token
 2. curl Congress RESTful API using the token above
 
+`alert_sample.py` sample:
+```python
+import argparse
+from datetime import datetime
+import json
+import os
+import requests
+import socket
+import sys
+import time
+
+from keystoneauth1 import session
+from congressclient.v1 import client
+from keystoneauth1.identity import v2
+from keystoneauth1.identity import v3
+
+def get_identity_auth():
+    auth_url = os.environ['OS_AUTH_URL']
+    username = os.environ['OS_USERNAME']
+    password = os.environ['OS_PASSWORD']
+    user_domain_name = os.environ.get('OS_USER_DOMAIN_NAME')
+    project_name = os.environ.get('OS_PROJECT_NAME') or os.environ.get('OS_TENANT_NAME')
+    project_domain_name = os.environ.get('OS_PROJECT_DOMAIN_NAME')
+    if auth_url.endswith('v3'):
+        return v3.Password(auth_url=auth_url,
+                           username=username,
+                           password=password,
+                           user_domain_name=user_domain_name,
+                           project_name=project_name,
+                           project_domain_name=project_domain_name)
+    else:
+        return v2.Password(auth_url=auth_url,
+                           username=username,
+                           password=password,
+                           tenant_name=project_name)
+
+class Alert(object):
+
+    event_type = "compute.host.down"
+
+    def __init__(self,args):
+
+        self.hostname = args.hostname
+        print ("hostname:",self.hostname)
+        self.ip_addr = socket.gethostbyname(self.hostname)
+        print ("ip_addr",self.ip_addr)
+
+        auth=get_identity_auth()
+        self.sess=session.Session(auth=auth)
+        congress = client.Client(session=self.sess, service_type='policy')
+        ds = congress.list_datasources()['results']
+        doctor_ds = next((item for item in ds if item['driver'] == 'doctor'),
+                            None)
+        congress_endpoint = congress.httpclient.get_endpoint(auth=auth)
+        self.inspector_url = ('%s/v1/data-sources/%s/tables/events/rows' %
+                                (congress_endpoint, doctor_ds['id']))
+        print ("inspector url:",self.inspector_url)
+
+    def report_error(self):
+        payload = [
+            {
+                'id': 'monitor_sample_id1',
+                'time': datetime.now().isoformat(),
+                'type': self.event_type,
+                'details': {
+                    'hostname': self.hostname,
+                    'status': 'down',
+                    'monitor': 'monitor_sample',
+                    'monitor_event_id': 'monitor_sample_event1'
+                },
+            },
+        ]
+        data = json.dumps(payload)
+
+        headers = {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-Auth-Token':self.sess.get_token(),
+        }
+        print ("token:",self.sess.get_token())
+        requests.put(self.inspector_url, data=data, headers=headers)
+        print ("alert send")
+
+def get_args():
+    parser = argparse.ArgumentParser(description='Doctor Sample Alert')
+    parser.add_argument('hostname', metavar='HOSTNAME', type=str, nargs='?',
+                           help='hostname of a down compute host')
+    return parser.parse_args()
+
+def main():
+    args=get_args()
+    alert = Alert(args)
+    alert.report_error()
+
+if __name__ == '__main__':
+    main()
+```
+
 `alert.sh` sample:
 
 ```shell
 #!/bin/bash
-
 username="admin"
 password="4MbCBXaqHJmARqpWzFNJFQF2T"
 congress_url="http://192.168.32.161:1789"
 keystone_url="http://192.168.32.161:5000/v2.0"
 # fetch token
 curl $keystone_url"/tokens" -X POST -H "Content-Type: application/json" -H "Accept: application/json"  -d '{"auth": {"tenantName": "admin", "passwordCredentials": {"username": "admin", "password": "4MbCBXaqHJmARqpWzFNJFQF2T"}}}' > result.json
-
 token0=$(jq .access.token.id result.json)
-
 token=${token0//\"/}
-
 rm result.json
-
 sendtime=`date`
 
 # send data
 curl -i -X PUT $congress_url/v1/data-sources/doctor/tables/events/rows -H "Content-Type: application/json" -d '[{"time":"2016-02-22T11:48:55Z","type":"compute.host.down","details":{"hostname":"overcloud-novacompute-0.opnfvlf.org","status":"down","monitor":"zabbix1","monitor_event_id":"111"}}]'  -H "X-Auth-Token: $token"
 ```
-
 Then
 
 ```shell
@@ -366,7 +448,6 @@ sudo systemctl enable zabbix-agent
 sudo systemctl status zabbix-agent
 ```
 
-
 ### 21 Inspector
 
 We use openstack congress as our Inspector
@@ -392,9 +473,9 @@ service openstack‐congress‐server restart
 source overcloudrc
 openstack congress datasource create doctor doctor
 ```
-Create policies needed
+Create different policies for different use case.
 
-- Use Case 1:
+- Use Case 1: Immediately notification
 ```shell
 openstack congress policy rule create \
     --name host_down classification \
@@ -417,17 +498,35 @@ openstack congress policy rule create \
         host_down(host),
         active_instance_in_host(vmid, host)'
 ```
-VMs in error state can't be live-migrated, change VM status to pause instead of error for live-migration policy, and alarm rule should be created for all VMs to do live-migrate. application manager could receive mutiple notifications and do live-migrate and unpause operation, which is beyond our use case scope.
+VMs in error state can't be live-migrated, change VM status to pause instead of error if you want to do live-migration, and alarm rule should be created for all VMs which supposed to do live-migration, so the application manager could receive mutiple notifications and do live-migrate and unpause job for all VMs, which is beyond our use case scope.
 
 ```shell
+# change VM state to 'pause'
 openstack congress policy rule create \
     --name pause_vm_states classification \
     'execute[nova:servers.pause(vmid)] :-
         host_down(host),
         active_instance_in_host(vmid, host)'
 ```
-You should also change alarm rule query condition. 
-- Use Case 2
+Create alarm rule for single instance example:
+
+```shell
+ceilometer alarm-event-create \
+--name "$ALARM_BASENAME$i" \
+--alarm-action "http://localhost:$CONSUMER_PORT/failure" \
+--description "VM failure" \
+--enabled True \
+--repeat-actions False \
+--severity "moderate" \
+--event-type compute.instance.update \
+-q "traits.state=string::error; \
+traits.instance_id=string::$vm_id"
+```
+
+- Use Case 2: Automatic fault recovery
+
+Policies needed:
+
 ```shell
 # event
 openstack congress policy rule create \
@@ -476,15 +575,24 @@ If true, nova check disk space on the target host by maximum size from the disk 
 > See https://docs.openstack.org/aodh/latest/contributor/event-alarm.html, https://docs.openstack.org/aodh/latest/admin/telemetry-alarms.html#event-based-alarm, https://github.com/openstack/aodh/blob/master/aodh/notifier/rest.py for details about Aodh.
 > See https://lingxiankong.github.io/2017-07-04-ceilometer-notification.html for details about notification
 
-- Use Case 1:
+Notice:
+
+For our Use Case 2 (Automatic fault recovery) 
+notification is not needed, user will never notice some hardware error occurs.
 
 Usually, configuration should be done in all controller nodes ,and related service have to be restarted to make sure your changes take into effect.
+
+- Use Case 1: Immediately notification
+
 ```shell
 ssh heat-admin@192.0.2.x # ssh onto every controller
 sudo -i # root necessary for operations later
 ```
 
+
 #### 220 Nova
+
+- Use Case 1: Immediately notification
 
 ```shell
 # vim /etc/nova/nova.conf
@@ -499,6 +607,8 @@ topics=notifications
 ```
 
 #### 221 Ceilometer
+
+- Use Case 1: Immediately notification
 
 ------event-------> ceilometer -----publish/notifier-------->
 
@@ -535,6 +645,8 @@ service openstack-ceilometer-central restart
 ```
 
 #### 222 Aodh(Create Alarm)
+
+- Use Case 1: Immediately notification
 
 ```shell
 # configurations
@@ -578,7 +690,9 @@ aodh alarm delete ALARM_ID
 
 ### 23 Application Manager
 
-Application Manager send request to Nova to migrate VMs when something wrong inspected 
+- Use Case 1: Immediately notification
+
+Application Manager send request to Nova to migrate VMs when hardware wrong was inspected.
 
 #### 230 Source Code
 
@@ -601,18 +715,15 @@ def event_posted():
     d = json.loads(request.data)
     return "OK"
 
-
 def get_args():
     parser = argparse.ArgumentParser(description='Doctor Sample Consumer')
     parser.add_argument('port', metavar='PORT', type=int, nargs='?',
                         help='the port for consumer')
     return parser.parse_args()
 
-
 def main():
     args = get_args()
     app.run(host="0.0.0.0", port=args.port)
-
 
 if __name__ == '__main__':
     main()
@@ -734,7 +845,7 @@ pip install cloudify==3.3.1
 
 ### 41 Cloudify Manager
 
-Bootstrap cloudify manager.
+Bootstrap cloudify manager:
 
 ```shell
 mkdir -p cloudify-manager
@@ -776,11 +887,7 @@ vim inputs/inputs.yaml
 cfy deployments create -b clearwater-3.3 -d clearwater-test --inputs inputs/inputs.yaml
 cfy executions start -w install -d clearwater-test
 ```
-
 You can also create and launch deployment via cloudify Web UI, just fill in proper information needed by deploying then start installation workflow.
-
-
-Note that the specified version must be satisfied otherwise the process might not work.
 
 #### Run the clearwater-live-test 
 
@@ -820,7 +927,8 @@ STUN/TURN/ICE      |
 
 Issues:
 - Connection lost after 15 seconds due to 'No ack received'
-- Both X-lite and Blink could not register successfully via TCP on one of our windows virtual machine, strangely on another windows virtual machine registering via tcp works properly
+- Both X-lite and Blink could not register successfully via TCP on one of our windows virtual machine, how ever these two windows VMs are supposed to have totally the same network environment and configuration.
+- On our recently deployment, both of these two VMs could register to ellis successfully via TCP.
 
 ## 6 Official Doctor Tests Demo
 
@@ -881,8 +989,8 @@ cfy deployments delete -d DEPLOYMENT_ID
 
 ### 82 Error
 
-#### 820 Error When Deploying Cloudify
-May be caused by openstack internal internet problem
+#### 820 Error Occured When Deploying Cloudify
+
 ```
 [192.168.32.195] run: curl --fail -XPOST localhost:8101/api/v2/provider/context?update=False -H "Content-Type: application/json" -d @/tmp/provider-context.json
 [192.168.32.195] out: curl: (22) The requested URL returned error: 500 INTERNAL SERVER ERROR
@@ -896,14 +1004,13 @@ Executed: /bin/bash -l -c "curl --fail -XPOST localhost:8101/api/v2/provider/con
 
 Aborting.
 ```
-
+This may be caused by openstack internal internet problem
+>See
 https://github.com/cloudify-cosmo/cloudify-manager-blueprints/issues/136
-https://groups.google.com/forum/#!topic/cloudify-users/7Vo2fUVlLks
+https://groups.google.com/forum/#!topic/cloudify-users/7Vo2fUVlLks for more details.
 
 #### 821 abort-on-prompts Was Set to True
-May be caused by ssh user wrong configuration,cloudify CLI machine was trying to ssh to manager machine by ubuntu,default user name should be centos, cloudify default value is centos, no need to change it.
 
-Another issue could cause this problem could be due to openstack internal problem, cloudify CLI successfully bootstrap a manager VM, then associate a floating ip to the VM in order to ssh to VM do some necessary configuration, the floating ip doesn't work properly, cloudify CLI bootstrap process will failed due to time out.
 ```
 2017-08-31 02:46:16 LOG <manager> [java_runtime_31aad.create] ERROR: Exception raised on operation [fabric_plugin.tasks.run_script] invocation
 Traceback (most recent call last):
@@ -947,5 +1054,9 @@ Fatal error: Needed to prompt for a connection or sudo password (host: 192.168.3
 
 Aborting.
 ```
+This may be caused by ssh user wrong configuration,cloudify CLI machine was trying to ssh to manager machine by ubuntu,default user name should be centos, cloudify default value is centos, no need to change it.
+
+Another reason could cause this problem may due to openstack internal problem, cloudify CLI successfully bootstrap a manager VM, then associate a floating ip to the VM in order to ssh to VM do some necessary configuration, the floating ip is assigned but your ping test cannot reached. Cloudify CLI bootstrap process will fail because of time out. Try to reinstall OPNFV is you have no better idea.
+
 ## Reference
 - https://wiki.opnfv.org/display/doctor/Doctor+Home
