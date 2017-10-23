@@ -4,7 +4,7 @@ After install Zabbix server and Zabbix agent, the following settings should be a
 
 ## Configuring settings for zabbix web interface
 
-Zabbix web interface needs some initial setup before we can use it, launch your browser and go to the address http://your_zabbix_server_ip/zabbix/. Filling the needed information and click Next stop to proceed
+Zabbix web interface needs some initial setup before we can use it, launch your browser and go to the address http://your_zabbix_server_ip/zabbix/. Filling the needed information and click Next stop to proceed.
 
 ## Adding new host to be monitored to the zabbix server
 
