@@ -279,6 +279,8 @@ Configure Item -> Trigger -> Action
 
 > See https://www.zabbix.com/documentation/3.2/manual/config/notifications/media/script for Zabbix details about alert script.  
 
+> See http://www.zsythink.net/archives/734 for alert script configuration.
+
 ```shell
 # Doctor driver API
 PUT /v1/data‐sources/doctor/tables/events/rows
