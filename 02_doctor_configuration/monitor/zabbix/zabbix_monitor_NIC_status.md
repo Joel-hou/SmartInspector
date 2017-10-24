@@ -32,3 +32,6 @@ Create an monitor item against the host as follows:
 - Application: Network Interfaces
 
 Make the item we added is enabled, you can navigate to Monitoring and then Latest data to see the data that supposed to be monitored
+
+## Reference
+> See https://stackoverflow.com/questions/17716431/how-to-monitor-network-card-link-status-in-zabbix for more details.
