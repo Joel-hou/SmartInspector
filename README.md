@@ -278,7 +278,6 @@ Configure Item -> Trigger -> Action
 ##### 2006 Alert Script
 
 > See https://www.zabbix.com/documentation/3.2/manual/config/notifications/media/script for Zabbix details about alert script.  
-> See `man curl` for bonus :)
 
 ```shell
 # Doctor driver API
@@ -289,6 +288,8 @@ PUT /v1/data‐sources/doctor/tables/events/rows
 2. curl Congress RESTful API using the token above
 
 `alert_sample.py` sample:
+This is useful to test your notification configuration, report error to congress.
+
 ```python
 import argparse
 from datetime import datetime
@@ -385,8 +386,9 @@ def main():
 if __name__ == '__main__':
     main()
 ```
+You can see the location of Zabbix alarm script in /etc/zabbix.conf, by default the file is located in /usr/lib/zabbix/alertscripts whcih where your alert.sh should be placed in.
 
-`alert.sh` sample:
+`alertscript.sh` sample:
 
 ```shell
 #!/bin/bash
@@ -407,8 +409,8 @@ curl -i -X PUT $congress_url/v1/data-sources/doctor/tables/events/rows -H "Conte
 Then
 
 ```shell
-chown zabbix.zabbix /usr/local/zabbix/share/zabbix/alertscripts/alertscript.sh
-chmod +x /usr/local/zabbix/share/zabbix/alertscripts/alertscript.sh
+chown zabbix.zabbix /usr/lib/zabbix/alertscripts/alertscript.sh
+chmod +x /usr/lib/zabbix/alertscripts/alertscript.sh
 ```
 
 ##### 2007 Add Media
