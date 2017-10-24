@@ -682,10 +682,12 @@ aodh alarm create --name test_alarm --type event --alarm-action "http://127.0.0.
 
 (If you use `consumer.py` in doctor tests it will listen at `12346` port. See http://docs.opnfv.org/en/stable-danube/submodules/doctor/docs/release/userguide/feature.userguide.html#immediate-notification for details.)
 
+
 ```shell
-# to disable an alarm rule
-aodh alarm update ‐‐enabled False ALARM_ID
-# to delete an alarm rule
+# reset alarm state
+# remember to reset alarm state to ok or delete alarm and create a new one so alarm can be triggered again
+aodh alarm state set --state ok alarm_name/alarm_id 
+# delete an alarm rule
 aodh alarm delete ALARM_ID
 ```
 
