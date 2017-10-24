@@ -277,7 +277,6 @@ Configure Item -> Trigger -> Action
 
 ##### 2006 Alert Script
 
-> See https://github.com/openstack/congress/blob/master/congress/datasources/doctor_driver.py for details about doctor driver.  
 > See https://www.zabbix.com/documentation/3.2/manual/config/notifications/media/script for Zabbix details about alert script.  
 > See `man curl` for bonus :)
 
